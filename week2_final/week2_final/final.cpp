@@ -4,13 +4,19 @@
 
 int main() {
 
+	printf("=-=-=-=-=-=-=-=-=-=-=\n");
+	printf("|  201907022        |\n");
+	printf("|  오자현의         |\n");
+	printf("|  Application      |\n");
+	printf("=-=-=-=-=-=-=-=-=-=-=\n");
+
 	while (1) {
 		char input;
 		int escPressed = 0;
 		int index = 0;
 		char str[5] = { ' ',' ' };
 
-		printf("command> ");
+		printf("command>");
 		while (1) {
 			if (_kbhit()) {// 키입력확인
 				input = _getch(); // 키 입력 받기

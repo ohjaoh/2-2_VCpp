@@ -1,6 +1,8 @@
+/*
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <conio.h>
+#define ESC 27
 
 void main() {
 	char abc;
@@ -11,9 +13,11 @@ void main() {
 	printf("=-=-=-=-=-=-=-=-=-=-=\n");
 
 	while (1) {
-		printf("command>");
-		abc = _getch();
 
+
+		printf("command>");
+		scanf("%c", &abc);
+		while (getchar() != '\n');
 		if (abc == 'q') {
 			printf("qwer 화이팅!\n");
 		}
@@ -28,12 +32,12 @@ void main() {
 		}
 		else {
 			printf("입력 오류 입니다. q, w, e, r, esc키를 입력");
-		}
+		}     
+		abc = _getch();
 		if (abc == 27) {
 			printf("ESC입력. 과제는 이클래스가 아닌 GIT에 올리자");
 			break;
 		}
-
 		printf("\n");
 	}
 
@@ -41,3 +45,4 @@ void main() {
 	return 0;
 
 }
+*/

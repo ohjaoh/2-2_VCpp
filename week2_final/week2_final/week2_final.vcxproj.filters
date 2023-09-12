@@ -15,10 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="학교수업%28x%29.c">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="home%28o%29.cpp">
+    <ClCompile Include="final.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

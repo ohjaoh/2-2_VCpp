@@ -27,7 +27,7 @@ void main() {
 			printf("r : 행복합니다.\n");
 		}
 		else {
-			printf("q, w, e, r, esc키를 입력");
+			printf("입력 오류 입니다. q, w, e, r, esc키를 입력");
 		}
 		if (abc == 27) {
 			printf("ESC입력. 과제는 이클래스가 아닌 GIT에 올리자");

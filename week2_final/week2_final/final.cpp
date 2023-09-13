@@ -59,6 +59,10 @@ int main() {
 				printf("\n행복합니다.");
 				break;
 			}
+			else {  // 한자리 입력했지만 q, w, e, r이 아닌 경우
+				printf("\n잘못된 입력");
+				break;
+			}
 
 		}
 

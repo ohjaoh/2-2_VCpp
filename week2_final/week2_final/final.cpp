@@ -14,7 +14,7 @@ int main() {
 		char input;
 		int escPressed = 0;
 		int index = 0;
-		char str[5] = { ' ',' ' };
+		char str[2] = { ' ',' ' };
 
 		printf("command>");
 		while (1) {

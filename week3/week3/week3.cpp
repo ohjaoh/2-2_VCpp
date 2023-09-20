@@ -10,6 +10,7 @@ int main() {
 		int index = 0;
 		chrono::milliseconds waitTime(300);
 		bool check = false; 
+		time_t startTime = time(nullptr);
 
 		cout << "기술커멘드" << endl;
 		while (1) {
@@ -24,7 +25,7 @@ int main() {
 				if (GetAsyncKeyState(VK_DOWN)) {
 					if (GetAsyncKeyState(VK_DOWN)) {
 						if (GetAsyncKeyState('A')) {
-							cout << "아따라야" << endl;
+							cout << "아도겐=o" << endl;
 						}
 					}
 				}

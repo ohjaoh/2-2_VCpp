@@ -18,10 +18,10 @@
     <ClCompile Include="week5.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="week5-1.cpp">
+    <ClCompile Include="week5-1final.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="move.cpp">
+    <ClCompile Include="chatgpt.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

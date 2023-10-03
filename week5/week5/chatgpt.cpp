@@ -23,6 +23,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
 
+        RECT rect;
+        GetClientRect(hwnd, &rect);
+        FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1)); // 화면지우기
+
         HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
         SelectObject(hdc, hBrush);
         // 사각형 그리기
@@ -49,6 +53,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             startPoint.y = HIWORD(lParam);
             endPoint = startPoint;
         }
+        return 0;
+
+    case WM_RBUTTONDOWN:
+        if (PtInRect(&rectangle, { LOWORD(lParam), HIWORD(lParam) }))
+        {
+            isMoving = true;
+            startPoint.x = LOWORD(lParam);
+            startPoint.y = HIWORD(lParam);
+        }
+
         return 0;
 
     case WM_MOUSEMOVE:
@@ -94,8 +108,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             isDrawing = false;
         }
-        else if (isMoving)
-        {
+        
+        return 0;
+
+    case WM_RBUTTONUP:
+        if (isMoving) {
             isMoving = false;
         }
         return 0;

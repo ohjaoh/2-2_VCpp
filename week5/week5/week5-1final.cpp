@@ -8,11 +8,8 @@
 
 #include <windows.h>
 
-HINSTANCE hInst;
-HWND hWnd;
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
-POINT dragstartPoint = { 0 };
 RECT rectangle = { 0,0,0,0 }; // 초기 사각형 위치 및 크기
 bool isDrawing = false;
 bool isMoving = false;
@@ -31,7 +28,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		minMaxInfo->ptMaxTrackSize.y = 600; // 최대 높이
 		return 0;
 	}
-	break;
+	return 0;
 
 	case WM_PAINT:
 	{
@@ -43,7 +40,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			RECT rect;
 			GetClientRect(hwnd, &rect);
 			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1)); // 화면지우기
-			MoveToEx(hdc, startPoint.x, startPoint.y, NULL);
 
 			HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
 			SelectObject(hdc, hBrush);
@@ -52,37 +48,30 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		ReleaseDC(hwnd, hdc);
 	}
-	break;
+	return 0;
 	case WM_LBUTTONDOWN:
-		if (PtInRect(&rectangle, { LOWORD(lParam), HIWORD(lParam) }))
+
+		isDrawing = true;
+		startPoint.x = LOWORD(lParam);
+		startPoint.y = HIWORD(lParam);
+		endPoint = startPoint;
+		return 0;
+
+	case WM_RBUTTONDOWN:
+	{
+		if (PtInRect(&rectangle, { LOWORD(lParam), HIWORD(lParam) })) // 만약 상자내부에서 클릭하면
 		{
 			isMoving = true;
 			startPoint.x = LOWORD(lParam);
 			startPoint.y = HIWORD(lParam);
 		}
-		else
-		{
-			isDrawing = true;
-			startPoint.x = LOWORD(lParam);
-			startPoint.y = HIWORD(lParam);
-			endPoint = startPoint;
-		}
-		break;
 
-	case WM_RBUTTONDOWN:
-	{
-
-		dragstartPoint.x = LOWORD(lParam);
-		dragstartPoint.y = HIWORD(lParam);
-
-		isMoving = 1;
 
 	}
-	break;
+	return 0;
 
 	case WM_MOUSEMOVE:
 	{
-		// 좌클릭마우스 이동 중
 		if (isDrawing)
 		{
 			endPoint.x = LOWORD(lParam);
@@ -98,8 +87,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
 			InvalidateRect(hwnd, NULL, TRUE);
 		}
-		// 우클릭마우스 이동 중
-		if (isMoving)
+		else if (isMoving)
 		{
 			int mouseX = LOWORD(lParam);
 			int mouseY = HIWORD(lParam);
@@ -122,7 +110,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		}
 	}
-	break;
+	return 0;
 
 	case WM_LBUTTONUP:
 	{
@@ -131,7 +119,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			isDrawing = false;
 		}
 	}
-	break;
+	return 0;
 
 	case WM_RBUTTONUP:
 	{
@@ -140,18 +128,17 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			isMoving = false;
 		}
 	}
-	break;
+	return 0;
 
 
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		exit(-1);
-		break;
+		return 0;
 	default:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
-		break;
+		return 0;
 	}
-
 
 	return S_OK;
 }

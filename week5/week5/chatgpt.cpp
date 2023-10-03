@@ -23,10 +23,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
 
+        HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
+        SelectObject(hdc, hBrush);
         // 사각형 그리기
         Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
 
         EndPaint(hwnd, &ps);
+        DeleteObject(hBrush);
+
+        ReleaseDC(hwnd, hdc);
     }
     return 0;
 

@@ -25,4 +25,7 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="chatgpt조교.txt" />
+  </ItemGroup>
 </Project>

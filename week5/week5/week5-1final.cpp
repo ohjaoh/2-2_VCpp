@@ -8,30 +8,25 @@
 
 #include <windows.h>
 
-int startPointx = 0;
-int startPointy = 0;
-int endPointx = 0;
-int endPointy = 0;
-int dragPointx = 0;
-int dragPointy = 0;
-int dragStartPointx = 0;
-int dragStartPointy = 0;
-int lenx = 0;
-int leny = 0;
-int tempx = 0, tempy = 0, tempxx = 0, tempyy = 0;
-int isMouseLButtonPressed = 0;
-int isMouseRButtonPressed = 0;
+HINSTANCE hInst;
+HWND hWnd;
+POINT startPoint = { 0 };
+POINT endPoint = { 0 };
+POINT dragstartPoint = { 0 };
+RECT rectangle = { 0,0,0,0 }; // 초기 사각형 위치 및 크기
+bool isDrawing = false;
+bool isMoving = false;
 
 // 윈도우의 이벤트를 처리하는 콜백(Callback) 함수.
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
-	case WM_GETMINMAXINFO: // 창 크기 고정
+	case WM_GETMINMAXINFO: // 창 크기 정보
 	{
 		MINMAXINFO* minMaxInfo = (MINMAXINFO*)lParam;
-		minMaxInfo->ptMinTrackSize.x = 800; // 최소 너비
-		minMaxInfo->ptMinTrackSize.y = 600; // 최소 높이
+		minMaxInfo->ptMinTrackSize.x = 800; // 최소 너비와 최대를 같게 하여 고정
+		minMaxInfo->ptMinTrackSize.y = 600; // 최소 높이와 최대를 같게 하여 고정
 		minMaxInfo->ptMaxTrackSize.x = 800; // 최대 너비
 		minMaxInfo->ptMaxTrackSize.y = 600; // 최대 높이
 		return 0;
@@ -40,21 +35,18 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_PAINT:
 	{
-		RECT rectangle = { startPointx, startPointy, endPointx, endPointy };
-		HDC hdc = GetDC(hwnd);
-		if (isMouseLButtonPressed)
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+
+		if (isDrawing)
 		{
 			RECT rect;
 			GetClientRect(hwnd, &rect);
 			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1)); // 화면지우기
-			MoveToEx(hdc, startPointx, startPointy, NULL);
+			MoveToEx(hdc, startPoint.x, startPoint.y, NULL);
 
 			HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
 			SelectObject(hdc, hBrush);
-			tempx = rectangle.left;
-			tempy = rectangle.top;
-			tempxx = rectangle.right;
-			tempyy = rectangle.bottom;
 			Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
 			DeleteObject(hBrush);
 		}
@@ -62,20 +54,28 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_LBUTTONDOWN:
-	{
-		startPointx = LOWORD(lParam);
-		startPointy = HIWORD(lParam);
-		isMouseLButtonPressed = 1;
-	}
-	break;
+		if (PtInRect(&rectangle, { LOWORD(lParam), HIWORD(lParam) }))
+		{
+			isMoving = true;
+			startPoint.x = LOWORD(lParam);
+			startPoint.y = HIWORD(lParam);
+		}
+		else
+		{
+			isDrawing = true;
+			startPoint.x = LOWORD(lParam);
+			startPoint.y = HIWORD(lParam);
+			endPoint = startPoint;
+		}
+		break;
 
 	case WM_RBUTTONDOWN:
 	{
 
-		dragStartPointx = LOWORD(lParam);
-		dragStartPointy = HIWORD(lParam);
+		dragstartPoint.x = LOWORD(lParam);
+		dragstartPoint.y = HIWORD(lParam);
 
-		isMouseRButtonPressed = 1;
+		isMoving = 1;
 
 	}
 	break;
@@ -83,35 +83,42 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 	{
 		// 좌클릭마우스 이동 중
-		if (isMouseLButtonPressed)
+		if (isDrawing)
 		{
-			endPointx = LOWORD(lParam);
-			endPointy = HIWORD(lParam);
+			endPoint.x = LOWORD(lParam);
+			endPoint.y = HIWORD(lParam);
+
+			// 사각형 크기 및 위치 설정
+			rectangle.left = min(startPoint.x, endPoint.x);
+			rectangle.top = min(startPoint.y, endPoint.y);
+			rectangle.right = max(startPoint.x, endPoint.x);
+			rectangle.bottom = max(startPoint.y, endPoint.y);
 
 
 			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
 			InvalidateRect(hwnd, NULL, TRUE);
 		}
-
-
 		// 우클릭마우스 이동 중
-		if (isMouseRButtonPressed)
+		if (isMoving)
 		{
-			dragPointx = LOWORD(lParam);
-			dragPointy = HIWORD(lParam);
-			lenx = dragPointx - dragStartPointx;
-			leny = dragPointy - dragStartPointy;
+			int mouseX = LOWORD(lParam);
+			int mouseY = HIWORD(lParam);
 
-			tempx = dragStartPointx + lenx;
-			tempy = dragStartPointy + leny;
-			tempxx = endPointx + lenx;
-			tempyy = endPointy + leny;
+			// 이전 위치에서 현재 마우스 위치까지 이동한 거리 계산
+			int deltaX = mouseX - startPoint.x;
+			int deltaY = mouseY - startPoint.y;
+
+			// 사각형 이동
+			rectangle.left += deltaX;
+			rectangle.top += deltaY;
+			rectangle.right += deltaX;
+			rectangle.bottom += deltaY;
 
 
 			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
 			InvalidateRect(hwnd, NULL, TRUE);
-			dragStartPointx = dragPointx;
-			dragStartPointy = dragPointy;
+			startPoint.x = mouseX;
+			startPoint.y = mouseY;
 
 		}
 	}
@@ -119,23 +126,19 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_LBUTTONUP:
 	{
-
-		endPointx = LOWORD(lParam);
-		endPointy = HIWORD(lParam);
-
-		isMouseLButtonPressed = 0;
-
-		// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
-		InvalidateRect(hwnd, NULL, TRUE);
+		if (isDrawing)
+		{
+			isDrawing = false;
+		}
 	}
 	break;
 
 	case WM_RBUTTONUP:
 	{
-		isMouseRButtonPressed = 0;
-
-		// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
-		InvalidateRect(hwnd, NULL, TRUE);
+		if (isMoving)
+		{
+			isMoving = false;
+		}
 	}
 	break;
 

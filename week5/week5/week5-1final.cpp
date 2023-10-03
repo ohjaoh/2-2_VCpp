@@ -35,17 +35,15 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hwnd, &ps);
 
-		if (isDrawing)
-		{
-			RECT rect;
-			GetClientRect(hwnd, &rect);
-			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1)); // 화면지우기
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+		FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1)); // 화면지우기
 
-			HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
-			SelectObject(hdc, hBrush);
-			Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
-			DeleteObject(hBrush);
-		}
+		HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
+		SelectObject(hdc, hBrush);
+		Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
+		DeleteObject(hBrush);
+
 		ReleaseDC(hwnd, hdc);
 	}
 	return 0;

@@ -38,23 +38,23 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		isKeyPressed = 1;
 		switch (wParam) {
 		case VK_LEFT:
-			rect_user.left -= 5;
-			rect_user.right -= 5;
+			rect_user.left -= 1;
+			rect_user.right -= 1;
 			InvalidateRect(hwnd, NULL, TRUE);
 			break;
 		case VK_RIGHT:
-			rect_user.left += 5;
-			rect_user.right += 5;
+			rect_user.left += 1;
+			rect_user.right += 1;
 			InvalidateRect(hwnd, NULL, TRUE);
 			break;
 		case VK_UP:
-			rect_user.top -= 5;
-			rect_user.bottom -= 5;
+			rect_user.top -= 1;
+			rect_user.bottom -= 1;
 			InvalidateRect(hwnd, NULL, TRUE);
 			break;
 		case VK_DOWN:
-			rect_user.top += 5;
-			rect_user.bottom += 5;
+			rect_user.top += 1;
+			rect_user.bottom += 1;
 			InvalidateRect(hwnd, NULL, TRUE);
 			break;
 		default:
@@ -66,12 +66,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 	{
-		if (PtInRect(&rect_target, { rect_user.left,rect_user.top })) {
-			FillRect(hdc, &rect_user, hBrush_user);
+		if (PtInRect(&rect_target, { rect_user.left,rect_user.top }) || PtInRect(&rect_target, { rect_user.right,rect_user.bottom })) { 
+			// PtInRect는 저번주에 사용했는데 맨뒤에 포인터좌표가 앞의 사각형에 있다면 true, 없다면 false를 반환한다.
 			TextOut(hdc, 10, 10, text, lstrlen(text));
 		}
-		FillRect(hdc, &rect_target, hBrush_target);
 		FillRect(hdc, &rect_user, hBrush_user);
+		FillRect(hdc, &rect_target, hBrush_target);
 	}
 	break;
 	case WM_CLOSE:

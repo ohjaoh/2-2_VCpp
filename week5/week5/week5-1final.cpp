@@ -10,12 +10,12 @@
 
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
-RECT rectangle = { 0,0,0,0 }; // 초기 사각형 위치 및 크기
+RECT rectangle = { 0, 0, 0, 0 }; // 초기 사각형 위치 및 크기
 bool isDrawing = false;
 bool isMoving = false;
 
 // 윈도우의 이벤트를 처리하는 콜백(Callback) 함수.
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) // UINT 로 윈도우에서 지정한 숫자들(여러 이벤트 관련인 듯)이 있다. 마우스한정 LPARAM로 좌표가 다 들어감
 {
 	switch (uMsg)
 	{
@@ -43,21 +43,20 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		SelectObject(hdc, hBrush);
 		Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
 		DeleteObject(hBrush);
-
 		ReleaseDC(hwnd, hdc);
 	}
 	return 0;
 	case WM_LBUTTONDOWN:
 
 		isDrawing = true;
-		startPoint.x = LOWORD(lParam);
-		startPoint.y = HIWORD(lParam);
+		startPoint.x = LOWORD(lParam);//롱파라미터의 절반의 처음 2바이트부분 (마우스의 x좌표)
+		startPoint.y = HIWORD(lParam);//롱파라미터의 절반의 나중 2바이트부분 (마우스의 y좌표)
 		endPoint = startPoint;
 		return 0;
 
 	case WM_RBUTTONDOWN:
 	{
-		if (PtInRect(&rectangle, { LOWORD(lParam), HIWORD(lParam) })) // 만약 상자내부에서 클릭하면
+		if (PtInRect(&rectangle, { LOWORD(lParam), HIWORD(lParam) })) // PtInRect(rect *변수명, 포인트(x,y)좌표 ) -> 지정사각형 안에서 우클릭한 좌표가 있을 때
 		{
 			isMoving = true;
 			startPoint.x = LOWORD(lParam);
@@ -75,7 +74,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			endPoint.x = LOWORD(lParam);
 			endPoint.y = HIWORD(lParam);
 
-			// 사각형 크기 및 위치 설정
+			// 사각형 크기 및 위치 설정 윈도우 api의 좌표는 좌상단을 (0, 0)으로 하고 아래로 시작위치에서 더 멀수록 큰 값임 
 			rectangle.left = min(startPoint.x, endPoint.x);
 			rectangle.top = min(startPoint.y, endPoint.y);
 			rectangle.right = max(startPoint.x, endPoint.x);

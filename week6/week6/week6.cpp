@@ -70,8 +70,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			// PtInRect는 저번주에 사용했는데 맨뒤에 포인터좌표가 앞의 사각형에 있다면 true, 없다면 false를 반환한다.
 			TextOut(hdc, 10, 10, text, lstrlen(text));
 		}
+		//SelectObject(hdc, hBrush_user); // 이거로 깜빡임을 제거하려했으나 실패
 		FillRect(hdc, &rect_user, hBrush_user);
+		//DeleteObject(hBrush_user);
 		FillRect(hdc, &rect_target, hBrush_target);
+		// 지속적으로 그림을 덮어서 그려주면서 전체를 초기화 해주는 듯하다.
 	}
 	break;
 	case WM_CLOSE:

@@ -66,11 +66,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 	{
-		if ((PtInRect(&rect_target, { rect_user.left,rect_user.top }))) {
+		if (PtInRect(&rect_target, { rect_user.left,rect_user.top })) {
 			FillRect(hdc, &rect_user, hBrush_user);
 			TextOut(hdc, 10, 10, text, lstrlen(text));
 		}
 		FillRect(hdc, &rect_target, hBrush_target);
+		FillRect(hdc, &rect_user, hBrush_user);
 	}
 	break;
 	case WM_CLOSE:

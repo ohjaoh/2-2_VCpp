@@ -136,9 +136,11 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 		return 0;
 	}
+	
 
 	return S_OK;
 }
+
 #ifdef UNICODE
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nShowCmd)
 #else
@@ -212,12 +214,9 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DispatchMessage(&msg);
 
 		}
-		/*else
-		{
-
-		}*/
+		// else{}
 	}
-
+	UnregisterClass(wc.lpszClassName, wc.hInstance);
 	//종료 메시지 보내기
 	return (int)msg.wParam;
 

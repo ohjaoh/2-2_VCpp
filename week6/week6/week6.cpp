@@ -21,11 +21,6 @@ RECT rect_target = { 50, 50, 150, 150 }; // ¿ÞÂÊ »ó´Ü ÁÂÇ¥ (50, 50)¿¡¼­ ¿À¸¥ÂÊ Ç
 // À©µµ¿ìÀÇ ÀÌº¥Æ®¸¦ Ã³¸®ÇÏ´Â ÄÝ¹é(Callback) ÇÔ¼ö.
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	HDC hdc = GetDC(hwnd);
-
-	HBRUSH hBrush_user = CreateSolidBrush(RGB(0, 0, 255));
-	HBRUSH hBrush_target = CreateSolidBrush(RGB(255, 0, 255));
-	HBRUSH hBrush_eraser = CreateSolidBrush(RGB(255, 255, 255));
 	const wchar_t* text = L"Crash!!!";
 
 
@@ -64,15 +59,29 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+
+		HBRUSH hBrush_user = CreateSolidBrush(RGB(0, 0, 255));
+		HBRUSH hBrush_target = CreateSolidBrush(RGB(255, 0, 255));
+		HBRUSH hBrush_eraser = CreateSolidBrush(RGB(255, 255, 255));
 		if (PtInRect(&rect_target, { rect_user.left,rect_user.top }) || PtInRect(&rect_target, { rect_user.right,rect_user.bottom })) {
 			// PtInRect´Â Àú¹øÁÖ¿¡ »ç¿ëÇß´Âµ¥ ¸ÇµÚ¿¡ Æ÷ÀÎÅÍÁÂÇ¥°¡ ¾ÕÀÇ »ç°¢Çü¿¡ ÀÖ´Ù¸é true, ¾ø´Ù¸é false¸¦ ¹ÝÈ¯ÇÑ´Ù.
 			TextOut(hdc, 10, 10, text, lstrlen(text));
 		}
-		//SelectObject(hdc, hBrush_user); // ÀÌ°Å·Î ±ôºýÀÓÀ» Á¦°ÅÇÏ·ÁÇßÀ¸³ª ½ÇÆÐ
-		FillRect(hdc, &rect_user, hBrush_user);
-		//DeleteObject(hBrush_user);
-		FillRect(hdc, &rect_target, hBrush_target);
-		// Áö¼ÓÀûÀ¸·Î ±×¸²À» µ¤¾î¼­ ±×·ÁÁÖ¸é¼­ ÀüÃ¼¸¦ ÃÊ±âÈ­ ÇØÁÖ´Â µíÇÏ´Ù.
+		SelectObject(hdc, hBrush_target); // ÀÌ°Å·Î ±ôºýÀÓÀ» Á¦°ÅÇÏ·ÁÇßÀ¸³ª ½ÇÆÐ°¡ ¾Æ´Ï¾ù°í ÆÐÀÎÆ®½ºÆ®·°ÃÄ¸¸µé¾îÁÖ´Ï ÇØ°áµÊ
+		Rectangle(hdc, rect_target.left, rect_target.top, rect_target.right, rect_target.bottom);
+		SelectObject(hdc, hBrush_user);
+		Rectangle(hdc, rect_user.left, rect_user.top, rect_user.right, rect_user.bottom);
+
+		//FillRect(hdc, &rect_user, hBrush_user);
+		//FillRect(hdc, &rect_target, hBrush_target);
+
+
+		DeleteObject(hBrush_user);
+		DeleteObject(hBrush_target);
+		DeleteObject(hBrush_eraser);
+		ReleaseDC(hwnd, hdc);
 	}
 	break;
 	case WM_CLOSE:
@@ -85,10 +94,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}
 
-	DeleteObject(hBrush_user);
-	DeleteObject(hBrush_target);
-	DeleteObject(hBrush_eraser);
-	ReleaseDC(hwnd, hdc);
 
 	return S_OK;
 }

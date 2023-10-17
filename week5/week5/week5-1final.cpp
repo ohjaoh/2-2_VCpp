@@ -52,7 +52,6 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		isDrawing = true;
 		startPoint.x = LOWORD(lParam);
 		startPoint.y = HIWORD(lParam);
-		endPoint = startPoint;
 		return 0;
 
 	case WM_RBUTTONDOWN:

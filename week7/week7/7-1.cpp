@@ -13,21 +13,6 @@ POINT startPoint = { 0 };
 POINT endPoint = { 0 };
 RECT rectangle = { 0,0,0,0 }; // 초기 사각형 위치 및 크기
 
-
-// 박스 그리기 함수
-void DrawBox(HWND hWnd, HDC hdc) {
-	RECT rect;
-	GetClientRect(hWnd, &rect);
-
-	if (Ractang) {
-		// 박스 그리기
-		HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 0)); // 빨간색 박스
-		SelectObject(hdc, hBrush);
-		Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
-		DeleteObject(hBrush);
-	}
-}
-
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
@@ -58,15 +43,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	case WM_PAINT: {
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
-		DrawBox(hWnd, hdc);
+		HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 0)); // 빨간색 박스
+
+		SelectObject(hdc, hBrush);
+		Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
+		DeleteObject(hBrush);
+
 		EndPaint(hWnd, &ps);
 		break;
 	}
-				 break;
+	break;
 	case WM_LBUTTONDOWN: {
 		startPoint.x = LOWORD(lParam);
 		startPoint.y = HIWORD(lParam);
-		endPoint = startPoint;
 	}break;
 	case WM_MOUSEMOVE:
 	{
@@ -80,6 +69,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			rectangle.top = min(startPoint.y, endPoint.y);
 			rectangle.right = max(startPoint.x, endPoint.x);
 			rectangle.bottom = max(startPoint.y, endPoint.y);
+
+			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
+			InvalidateRect(hWnd, NULL, TRUE);
 		}
 	}
 	return 0;

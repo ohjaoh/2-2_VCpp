@@ -3,8 +3,8 @@
 
 // 박스를 나타내는 변수
 bool Ractang = false;
-// 삼각형
-bool Trang = false;
+// 원
+bool eclipse = false;
 // 직선
 bool Linang = false;
 
@@ -12,7 +12,6 @@ bool Linang = false;
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
 RECT rectangle = { 0,0,0,0 }; // 초기 사각형 위치 및 크기
-
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
@@ -20,14 +19,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		if (LOWORD(wParam) == 1) {
 			// 첫 번째 버튼 클릭
 			Ractang = true;
-			Trang = false;
+			eclipse = false;
 			Linang = false;
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		else if (LOWORD(wParam) == 2) {
 			// 두 번째 버튼 클릭
 			Ractang = false;
-			Trang = true;
+			eclipse = true;
 			Linang = false;
 			
 			InvalidateRect(hWnd, NULL, TRUE);
@@ -35,7 +34,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		else if (LOWORD(wParam) == 3) {
 			// 세 번째 버튼 클릭
 			Ractang = false;
-			Trang = false;
+			eclipse = false;
 			Linang = true;
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
@@ -43,11 +42,24 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	case WM_PAINT: {
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
-		HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 0)); // 빨간색 박스
+		HBRUSH hBrush = CreateSolidBrush(RGB(255, 100, 255)); // 빨간색 박스
+		
+		if (Ractang) {
+			SelectObject(hdc, hBrush);
+			Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
+			DeleteObject(hBrush);
+		}
+		if (eclipse) {
+			SelectObject(hdc, hBrush);
+			Ellipse(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
+			DeleteObject(hBrush);
 
-		SelectObject(hdc, hBrush);
-		Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
-		DeleteObject(hBrush);
+		}
+		if (Linang) {
+			MoveToEx(hdc, startPoint.x, startPoint.y, NULL);
+			LineTo(hdc, endPoint.x, endPoint.y);
+		}
+
 
 		EndPaint(hWnd, &ps);
 		break;
@@ -59,7 +71,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	}break;
 	case WM_LBUTTONUP: {
 		Ractang = false;
-		Trang = false;
+		eclipse = false;
 		Linang = false;
 	}break;
 	case WM_MOUSEMOVE:
@@ -130,7 +142,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 		20, 20, 200, 60, hWnd, (HMENU)1, hInstance, NULL);
 
 	hButton2 = CreateWindow(
-		L"BUTTON", L"삼각형", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		L"BUTTON", L"원", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		20, 200, 200, 60, hWnd, (HMENU)2, hInstance, NULL);
 
 	hButton3 = CreateWindow(

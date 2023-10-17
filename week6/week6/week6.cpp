@@ -65,8 +65,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		HBRUSH hBrush_user = CreateSolidBrush(RGB(0, 0, 255));
 		HBRUSH hBrush_target = CreateSolidBrush(RGB(255, 0, 255));
 		HBRUSH hBrush_eraser = CreateSolidBrush(RGB(255, 255, 255));
-		if (PtInRect(&rect_target, { rect_user.left,rect_user.top }) || PtInRect(&rect_target, { rect_user.right,rect_user.bottom })) {
-			// PtInRect는 저번주에 사용했는데 맨뒤에 포인터좌표가 앞의 사각형에 있다면 true, 없다면 false를 반환한다.
+		if (PtInRect(&rect_target, { rect_user.left, rect_user.top }) || PtInRect(&rect_target, { rect_user.right, rect_user.bottom }) || PtInRect(&rect_target, { rect_user.left, rect_user.bottom }) || PtInRect(&rect_target, { rect_user.right, rect_user.top })) {			// PtInRect는 저번주에 사용했는데 맨뒤에 포인터좌표가 앞의 사각형에 있다면 true, 없다면 false를 반환한다.
 			TextOut(hdc, 10, 10, text, lstrlen(text));
 		}
 		SelectObject(hdc, hBrush_target); // 이거로 깜빡임을 제거하려했으나 실패가 아니엇고 패인트스트럭쳐만들어주니 해결됨

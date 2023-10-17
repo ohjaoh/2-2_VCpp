@@ -57,6 +57,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		startPoint.x = LOWORD(lParam);
 		startPoint.y = HIWORD(lParam);
 	}break;
+	case WM_LBUTTONUP: {
+		Ractang = false;
+		Trang = false;
+		Linang = false;
+	}break;
 	case WM_MOUSEMOVE:
 	{
 		if (Ractang)

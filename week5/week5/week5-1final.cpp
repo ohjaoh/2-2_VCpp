@@ -1,94 +1,142 @@
-//#define DEBUG
+#ifdef _DEBUG_
 #ifdef UNICODE
-#ifdef DEBUG
 #pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
 #else
-#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:WINDOWS")
-#endif // DEBUG
-#else
-#ifdef DEBUG
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
-#else
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:WINDOWS")
-#endif // DEBUG
+#endif
 #endif
 
 #include <windows.h>
-int isKeyPressed = 0;
-RECT rect_user = { 10, 10, 15, 15 };
-RECT rect_target = { 50, 50, 150, 150 }; // 왼쪽 상단 좌표 (50, 50)에서 오른쪽 하단 좌표 (150, 150)까지의 사각형
+
+POINT startPoint = { 0 };
+POINT endPoint = { 0 };
+RECT rectangle = { 0,0,0,0 }; // 초기 사각형 위치 및 크기
+bool isDrawing = false;
+bool isMoving = false;
 
 // 윈도우의 이벤트를 처리하는 콜백(Callback) 함수.
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	HDC hdc = GetDC(hwnd);
-
-	HBRUSH hBrush_user = CreateSolidBrush(RGB(0, 0, 255));
-	HBRUSH hBrush_target = CreateSolidBrush(RGB(255, 0, 255));
-	HBRUSH hBrush_eraser = CreateSolidBrush(RGB(255, 255, 255));
-	const wchar_t* text = L"Crash!!!";
-
-
-
 	switch (uMsg)
 	{
-	case WM_KEYDOWN:
-		isKeyPressed = 1;
-		switch (wParam) {
-		case VK_LEFT:
-			rect_user.left -= 1;
-			rect_user.right -= 1;
-			InvalidateRect(hwnd, NULL, TRUE);
-			break;
-		case VK_RIGHT:
-			rect_user.left += 1;
-			rect_user.right += 1;
-			InvalidateRect(hwnd, NULL, TRUE);
-			break;
-		case VK_UP:
-			rect_user.top -= 1;
-			rect_user.bottom -= 1;
-			InvalidateRect(hwnd, NULL, TRUE);
-			break;
-		case VK_DOWN:
-			rect_user.top += 1;
-			rect_user.bottom += 1;
-			InvalidateRect(hwnd, NULL, TRUE);
-			break;
-		default:
-			break;
-		}
-		break;
-	case WM_KEYUP:
-		isKeyPressed = 0;
-		break;
+	case WM_GETMINMAXINFO: // 창 크기 정보
+	{
+		MINMAXINFO* minMaxInfo = (MINMAXINFO*)lParam;
+		minMaxInfo->ptMinTrackSize.x = 800; // 최소 너비와 최대를 같게 하여 고정
+		minMaxInfo->ptMinTrackSize.y = 600; // 최소 높이와 최대를 같게 하여 고정
+		minMaxInfo->ptMaxTrackSize.x = 800; // 최대 너비
+		minMaxInfo->ptMaxTrackSize.y = 600; // 최대 높이
+		return 0;
+	}
+	return 0;
+
 	case WM_PAINT:
 	{
-		if (PtInRect(&rect_target, { rect_user.left,rect_user.top }) || PtInRect(&rect_target, { rect_user.right,rect_user.bottom })) {
-			// PtInRect는 저번주에 사용했는데 맨뒤에 포인터좌표가 앞의 사각형에 있다면 true, 없다면 false를 반환한다.
-			TextOut(hdc, 10, 10, text, lstrlen(text));
-		}
-		//SelectObject(hdc, hBrush_user); // 이거로 깜빡임을 제거하려했으나 실패
-		FillRect(hdc, &rect_user, hBrush_user);
-		//DeleteObject(hBrush_user);
-		FillRect(hdc, &rect_target, hBrush_target);
-		// 지속적으로 그림을 덮어서 그려주면서 전체를 초기화 해주는 듯하다.
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+		FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1)); // 화면지우기
+
+		HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 255));
+		SelectObject(hdc, hBrush);
+		Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
+		DeleteObject(hBrush);
+
+		ReleaseDC(hwnd, hdc);
 	}
-	break;
-	case WM_CLOSE:
-		DestroyWindow(hwnd);
-		break;
+	return 0;
+	case WM_LBUTTONDOWN:
+
+		isDrawing = true;
+		startPoint.x = LOWORD(lParam);
+		startPoint.y = HIWORD(lParam);
+		endPoint = startPoint;
+		return 0;
+
+	case WM_RBUTTONDOWN:
+	{
+		if (PtInRect(&rectangle, { LOWORD(lParam), HIWORD(lParam) })) // 만약 상자내부에서 클릭하면
+		{
+			isMoving = true;
+			startPoint.x = LOWORD(lParam);
+			startPoint.y = HIWORD(lParam);
+		}
+
+
+	}
+	return 0;
+
+	case WM_MOUSEMOVE:
+	{
+		if (isDrawing)
+		{
+			endPoint.x = LOWORD(lParam);
+			endPoint.y = HIWORD(lParam);
+
+			// 사각형 크기 및 위치 설정
+			rectangle.left = min(startPoint.x, endPoint.x);
+			rectangle.top = min(startPoint.y, endPoint.y);
+			rectangle.right = max(startPoint.x, endPoint.x);
+			rectangle.bottom = max(startPoint.y, endPoint.y);
+
+
+			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
+			InvalidateRect(hwnd, NULL, TRUE);
+		}
+		else if (isMoving)
+		{
+			int mouseX = LOWORD(lParam);
+			int mouseY = HIWORD(lParam);
+
+			// 이전 위치에서 현재 마우스 위치까지 이동한 거리 계산
+			int deltaX = mouseX - startPoint.x;
+			int deltaY = mouseY - startPoint.y;
+
+			// 사각형 이동
+			rectangle.left += deltaX;
+			rectangle.top += deltaY;
+			rectangle.right += deltaX;
+			rectangle.bottom += deltaY;
+
+
+			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
+			InvalidateRect(hwnd, NULL, TRUE);
+			startPoint.x = mouseX;
+			startPoint.y = mouseY;
+
+		}
+	}
+	return 0;
+
+	case WM_LBUTTONUP:
+	{
+		if (isDrawing)
+		{
+			isDrawing = false;
+		}
+	}
+	return 0;
+
+	case WM_RBUTTONUP:
+	{
+		if (isMoving)
+		{
+			isMoving = false;
+		}
+	}
+	return 0;
+
+
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		break;
+		exit(-1);
+		return 0;
 	default:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+		return 0;
 	}
-
-	DeleteObject(hBrush_user);
-	DeleteObject(hBrush_target);
-	DeleteObject(hBrush_eraser);
-	ReleaseDC(hwnd, hdc);
 
 	return S_OK;
 }
@@ -108,7 +156,6 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wc.hCursor = LoadCursor(NULL, IDC_CROSS);
 	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wc.lpfnWndProc = WindowProc;
 
 	// 윈도우 클래스 등록.
@@ -119,7 +166,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	}
 
 	// Window viewport 영역 조정
-	RECT rect = { 150, 100, 800, 600 };
+	RECT rect = { 0, 0, 800, 600 };
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, 0);
 	int width = rect.right - rect.left;
 	int height = rect.bottom - rect.top;
@@ -127,7 +174,7 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	// 윈도우 생성
 	HWND hwnd = CreateWindow(
 		wc.lpszClassName,
-		TEXT("컴소 Application"),
+		TEXT("201907022 오자현"),
 		WS_OVERLAPPEDWINDOW,
 		0, 0,
 		width, height,
@@ -153,27 +200,24 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	MSG msg;
 	ZeroMemory(&msg, sizeof(msg));
 
-	// 메시지 처리.
 	while (msg.message != WM_QUIT)
 	{
-		if (GetMessage(&msg, NULL, 0, 0))
+		// 메시지 처리.
+		if (GetMessage(&msg, hwnd, 0, 0))
+			//if (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE)) // PM_REMOVE의 자리는 이 메세지를 쓰고 어떡할거냐.의 의미인데 지운다는 것임.
 		{
+
 			// 메시지 해석해줘.
 			TranslateMessage(&msg);
 			// 메시지를 처리해야할 곳에 전달해줘.
 			DispatchMessage(&msg);
-		}
-		//if(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		//{
-		//	// 메시지 해석해줘.
-		//	TranslateMessage(&msg);
-		//	// 메시지를 처리해야할 곳에 전달해줘.
-		//	DispatchMessage(&msg);
-		//} // PM_REMOVE의 자리는 이 메세지를 쓰고 어떡할거냐.의 의미인데 지운다는 것임.
-		//else{}
-	}
 
-	UnregisterClass(wc.lpszClassName, wc.hInstance);
+		}
+		/*else
+		{
+
+		}*/
+	}
 
 	//종료 메시지 보내기
 	return (int)msg.wParam;

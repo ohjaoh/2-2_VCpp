@@ -12,6 +12,7 @@ bool Linang = false;
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
 RECT rectangle = { 0,0,0,0 }; // 초기 사각형 위치 및 크기
+
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
@@ -21,41 +22,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			Ractang = true;
 			eclipse = false;
 			Linang = false;
-			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		else if (LOWORD(wParam) == 2) {
 			// 두 번째 버튼 클릭
 			Ractang = false;
 			eclipse = true;
 			Linang = false;
-			
-			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		else if (LOWORD(wParam) == 3) {
 			// 세 번째 버튼 클릭
 			Ractang = false;
 			eclipse = false;
 			Linang = true;
-			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		break;
+
 	case WM_PAINT: {
+		RECT rect;
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
 		HBRUSH hBrush = CreateSolidBrush(RGB(255, 100, 255)); // 빨간색 박스
 		
 		if (Ractang) {
+			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
 			SelectObject(hdc, hBrush);
 			Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
 			DeleteObject(hBrush);
 		}
 		if (eclipse) {
+			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
 			SelectObject(hdc, hBrush);
 			Ellipse(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
 			DeleteObject(hBrush);
-
 		}
 		if (Linang) {
+			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
 			MoveToEx(hdc, startPoint.x, startPoint.y, NULL);
 			LineTo(hdc, endPoint.x, endPoint.y);
 		}
@@ -66,30 +67,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	}
 	break;
 	case WM_LBUTTONDOWN: {
-		startPoint.x = LOWORD(lParam);
-		startPoint.y = HIWORD(lParam);
+		if (Ractang == true || eclipse == true || Linang == true) {
+			startPoint.x = LOWORD(lParam);
+			startPoint.y = HIWORD(lParam);
+		}
 	}break;
 	case WM_LBUTTONUP: {
+		endPoint.x = LOWORD(lParam);
+		endPoint.y = HIWORD(lParam);
 		Ractang = false;
 		eclipse = false;
 		Linang = false;
 	}break;
 	case WM_MOUSEMOVE:
 	{
-		if (Ractang)
+		endPoint.x = LOWORD(lParam);
+		endPoint.y = HIWORD(lParam);
+		if (Ractang || eclipse)
 		{
-			endPoint.x = LOWORD(lParam);
-			endPoint.y = HIWORD(lParam);
-
 			// 사각형 크기 및 위치 설정
 			rectangle.left = min(startPoint.x, endPoint.x);
 			rectangle.top = min(startPoint.y, endPoint.y);
 			rectangle.right = max(startPoint.x, endPoint.x);
 			rectangle.bottom = max(startPoint.y, endPoint.y);
-
 			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
+		if (Linang) {
+			InvalidateRect(hWnd, NULL, TRUE);
+		}
+
 	}
 	return 0;
 
@@ -147,7 +154,7 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	hButton3 = CreateWindow(
 		L"BUTTON", L"직선", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		20, 400, 200, 60, hWnd, (HMENU)2, hInstance, NULL);
+		20, 400, 200, 60, hWnd, (HMENU)3, hInstance, NULL);
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);

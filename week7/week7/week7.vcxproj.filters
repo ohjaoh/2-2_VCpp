@@ -18,5 +18,11 @@
     <ClCompile Include="7-1.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="7-2.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="7-2.txt" />
   </ItemGroup>
 </Project>

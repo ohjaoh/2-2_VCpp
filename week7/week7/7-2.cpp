@@ -88,7 +88,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				 break;
 	case WM_LBUTTONDOWN: {
 		LbuttonPressed = true;
-		if (Ractang == true || eclipse == true || Linang == true) {
+		if (Ractang == true || eclipse == true || Linang == true || trang == true) {
 			startPoint.x = LOWORD(lParam);
 			startPoint.y = HIWORD(lParam);
 		}
@@ -121,11 +121,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				InvalidateRect(hWnd, NULL, TRUE);
 			}
 			if (trang) {
+				Point3.x = (startPoint.x + endPoint.x) / 2;
+				Point3.y = startPoint.y;
+				ver[0] = { startPoint.x, endPoint.y };
+				ver[1] = { Point3.x, Point3.y };
+				ver[2] = { endPoint.x, endPoint.y };
+				/* 직각삼각형버전
 				Point3.x = startPoint.x;
 				Point3.y = endPoint.y;
 				ver[0] = { startPoint.x, startPoint.y };
 				ver[1] = { Point3.x, Point3.y };
-				ver[2] = { endPoint.x, endPoint.y };
+				ver[2] = { endPoint.x, endPoint.y }; */
 				InvalidateRect(hWnd, NULL, TRUE);
 			}
 		}

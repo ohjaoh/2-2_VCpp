@@ -55,6 +55,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		break;
 
 	case WM_PAINT: {
+
 		RECT rect;
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
@@ -107,8 +108,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	case WM_MOUSEMOVE:
 	{
 		if (LbuttonPressed) {
-		endPoint.x = LOWORD(lParam);
-		endPoint.y = HIWORD(lParam);
+			endPoint.x = LOWORD(lParam);
+			endPoint.y = HIWORD(lParam);
 			if (Ractang || eclipse)
 			{
 				// 사각형 크기 및 위치 설정

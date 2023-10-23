@@ -94,6 +94,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		}
 	}break;
 	case WM_LBUTTONUP: {
+		LbuttonPressed = false;
 		endPoint.x = LOWORD(lParam);
 		endPoint.y = HIWORD(lParam);
 		Ractang = false;
@@ -103,9 +104,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	}break;
 	case WM_MOUSEMOVE:
 	{
+		if (LbuttonPressed) {
 		endPoint.x = LOWORD(lParam);
 		endPoint.y = HIWORD(lParam);
-		if (LbuttonPressed) {
 			if (Ractang || eclipse)
 			{
 				// 사각형 크기 및 위치 설정

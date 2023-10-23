@@ -79,7 +79,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		}
 		if (trang) {
 			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
+			SelectObject(hdc, hBrush);
 			Polygon(hdc, ver, 3);
+			DeleteObject(hBrush);
 		}
 
 		EndPaint(hWnd, &ps);

@@ -142,7 +142,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				rectangle.top = min(startPoint.y, endPoint.y);
 				rectangle.right = max(startPoint.x, endPoint.x);
 				rectangle.bottom = max(startPoint.y, endPoint.y);
-				// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
+				// WM_PAINT 메시지를 유발하여 화면에 그립니다.
 				InvalidateRect(hWnd, NULL, TRUE);
 			}
 			if (Linang) {

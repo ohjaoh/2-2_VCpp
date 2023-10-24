@@ -11,7 +11,8 @@ bool Linang = false;
 bool trang = false;
 // 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
 bool LbuttonPressed = false;
-
+// 색상버튼
+int color = 0;
 
 // 그리는데 필요한 녀석들
 POINT startPoint = { 0 };
@@ -19,6 +20,7 @@ POINT endPoint = { 0 };
 POINT Point3 = { 0 };
 POINT ver[3];
 RECT rectangle = { 0,0,0,0 }; // 초기 사각형 위치 및 크기
+HBRUSH hBrush;
 
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -52,6 +54,22 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			Linang = false;
 			trang = true;
 		}
+		else if (LOWORD(wParam) == 5) {
+			// 다섯 번째 버튼 클릭
+			Ractang = false;
+			eclipse = false;
+			Linang = false;
+			trang = false;
+			color = 5;
+		}
+		else if (LOWORD(wParam) == 6) {
+			// 여섯 번째 버튼 클릭
+			Ractang = false;
+			eclipse = false;
+			Linang = false;
+			trang = false;
+			color = 6;
+		}
 		break;
 
 	case WM_PAINT: {
@@ -59,19 +77,27 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		RECT rect;
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
-		HBRUSH hBrush = CreateSolidBrush(RGB(255, 100, 255)); // 빨간색 박스
+		if (color == 5) {
+			HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 0));
+			SelectObject(hdc, hBrush);
+		}
+		else if (color == 6) {
+			HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 255));
+			SelectObject(hdc, hBrush);
+		}
+		else {
+			HBRUSH hBrush = CreateSolidBrush(RGB(255, 100, 255));
+			SelectObject(hdc, hBrush);
+
+		}
 
 		if (Ractang) {
 			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
-			SelectObject(hdc, hBrush);
 			Rectangle(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
-			DeleteObject(hBrush);
 		}
 		if (eclipse) {
 			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
-			SelectObject(hdc, hBrush);
 			Ellipse(hdc, rectangle.left, rectangle.top, rectangle.right, rectangle.bottom);
-			DeleteObject(hBrush);
 		}
 		if (Linang) {
 			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
@@ -80,11 +106,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		}
 		if (trang) {
 			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
-			SelectObject(hdc, hBrush);
 			Polygon(hdc, ver, 3);
-			DeleteObject(hBrush);
 		}
 
+		DeleteObject(hBrush);
 		EndPaint(hWnd, &ps);
 		break;
 	}
@@ -154,10 +179,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
 
 // 프로그램 진입점
-int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow) {
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
 
 	HWND hWnd;
-	HWND hButton1, hButton2, hButton3, hButton4;
+	HWND hButton1, hButton2, hButton3, hButton4, hButton5, hButton6;
 
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -191,15 +216,23 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmd
 
 	hButton2 = CreateWindow(
 		L"BUTTON", L"원", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		20, 150, 200, 60, hWnd, (HMENU)2, hInstance, NULL);
+		20, 120, 200, 60, hWnd, (HMENU)2, hInstance, NULL);
 
 	hButton3 = CreateWindow(
 		L"BUTTON", L"직선", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		20, 300, 200, 60, hWnd, (HMENU)3, hInstance, NULL);
+		20, 220, 200, 60, hWnd, (HMENU)3, hInstance, NULL);
 
 	hButton4 = CreateWindow(
 		L"BUTTON", L"삼각형", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		20, 450, 200, 60, hWnd, (HMENU)4, hInstance, NULL);
+		20, 320, 200, 60, hWnd, (HMENU)4, hInstance, NULL);
+
+	hButton5 = CreateWindow(
+		L"BUTTON", L"빨강", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		20, 420, 200, 60, hWnd, (HMENU)5, hInstance, NULL);
+
+	hButton6 = CreateWindow(
+		L"BUTTON", L"파랑", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		20, 520, 200, 60, hWnd, (HMENU)6, hInstance, NULL);
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);

@@ -1,3 +1,4 @@
+#include <math.h>
 #include <windows.h>
 
 // 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
@@ -11,6 +12,7 @@ POINT startPoint = { 0 };
 POINT endPoint = { 0 };
 POINT Point3 = { 0 };
 POINT ver[3];
+POINT five[5];
 RECT rectangle = { 0,0,0,0 }; // 초기 사각형 위치 및 크기
 HBRUSH hBrush;
 
@@ -35,14 +37,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			Shape = 4;
 		}
 		else if (LOWORD(wParam) == 5) {
-			// 다섯 번째 버튼 클릭
-			Shape = 0;
-			color = 5;
+			// 네 번째 버튼 클릭
+			Shape = 5;
 		}
 		else if (LOWORD(wParam) == 6) {
-			// 여섯 번째 버튼 클릭
+			// 다섯 번째 버튼 클릭
 			Shape = 0;
 			color = 6;
+		}
+		else if (LOWORD(wParam) == 7) {
+			// 여섯 번째 버튼 클릭
+			Shape = 0;
+			color = 7;
 		}
 		break;
 
@@ -51,11 +57,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		RECT rect;
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
-		if (color == 5) {
+		if (color == 6) {
 			HBRUSH hBrush = CreateSolidBrush(RGB(255, 0, 0));
 			SelectObject(hdc, hBrush);
 		}
-		else if (color == 6) {
+		else if (color == 7) {
 			HBRUSH hBrush = CreateSolidBrush(RGB(0, 0, 255));
 			SelectObject(hdc, hBrush);
 		}
@@ -82,12 +88,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
 			Polygon(hdc, ver, 3);
 		}
+		if (Shape == 5) {
+			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
+			Polygon(hdc, five, 5);
+		}
 
 		DeleteObject(hBrush);
 		EndPaint(hWnd, &ps);
 		break;
 	}
-				 break;
+	break;
 	case WM_LBUTTONDOWN: {
 		LbuttonPressed = true;
 		if (Shape) {
@@ -135,6 +145,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				// WM_PAINT 메시지를 유발하여 화면에 그립니다.
 				InvalidateRect(hWnd, NULL, TRUE);
 			}
+			if (Shape == 5) {
+				// 오각형 그리기
+				int radius = abs(startPoint.x - endPoint.x);
+				int centerX = (startPoint.x + endPoint.x) / 2;
+				int centerY = (startPoint.y + endPoint.y) / 2;
+
+				// 5개의 꼭지점 좌표 계산
+				for (int i = 0; i < 5; i++) {
+					double angle = 2 * 3.14159265358979323846 * i / 5;
+					five[i].x = centerX + int(radius * cos(angle));
+					five[i].y = centerY - int(radius * sin(angle));
+					InvalidateRect(hWnd, NULL, TRUE);
+				}
+			}
 		}
 	}
 	return 0;
@@ -155,7 +179,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
 
 	HWND hWnd;
-	HWND hButton1, hButton2, hButton3, hButton4, hButton5, hButton6;
+	HWND hButton1, hButton2, hButton3, hButton4, hButton5, hButton6, hButton7;
 
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -200,12 +224,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		20, 320, 200, 60, hWnd, (HMENU)4, hInstance, NULL);
 
 	hButton5 = CreateWindow(
-		L"BUTTON", L"빨강", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		L"BUTTON", L"오각형", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		20, 420, 200, 60, hWnd, (HMENU)5, hInstance, NULL);
 
 	hButton6 = CreateWindow(
-		L"BUTTON", L"파랑", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		L"BUTTON", L"빨강", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		20, 520, 200, 60, hWnd, (HMENU)6, hInstance, NULL);
+
+	hButton7 = CreateWindow(
+		L"BUTTON", L"파랑", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		20, 620, 200, 60, hWnd, (HMENU)7, hInstance, NULL);
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);

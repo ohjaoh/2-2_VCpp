@@ -1,6 +1,7 @@
 #include <math.h>
 #include <windows.h>
 
+bool isMoving = false;
 // 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
 bool LbuttonPressed = false;
 // 색상버튼
@@ -10,8 +11,8 @@ int Shape = 0;
 // 그리는데 필요한 녀석들
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
-POINT Point3 = { 0 };
 POINT ver[5];
+POINT star[5]; // 별을 그리기 위한 좌표 배열
 RECT rectangle = { 0,0,0,0 }; // 초기 사각형 위치 및 크기
 HBRUSH hBrush;
 
@@ -59,6 +60,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			Shape = 0;
 			color = 4;
 		}
+		else if (LOWORD(wParam) == 10) {
+			// 하늘색버튼 클릭
+			Shape = 0;
+			color = 5;
+		}
+		else if (LOWORD(wParam) == 11) {
+			// 오각형버튼 클릭
+			Shape = 6;
+		}
 		break;
 
 	case WM_PAINT: {
@@ -80,6 +90,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		}
 		else if (color == 4) {
 			HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 0));
+			SelectObject(hdc, hBrush);
+		}
+		else if (color == 5) {
+			HBRUSH hBrush = CreateSolidBrush(RGB(0, 255, 255));
 			SelectObject(hdc, hBrush);
 		}
 		else {
@@ -109,12 +123,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
 			Polygon(hdc, ver, 5);
 		}
+		if (Shape == 6) {
+			FillRect(hdc, &rect, (HBRUSH)(COLOR_WINDOW + 1));
+			Polygon(hdc, star, 5);  // 별 모양 그리기
+		}
+
 
 		DeleteObject(hBrush);
 		EndPaint(hWnd, &ps);
 		break;
 	}
-	break;
+				 break;
 	case WM_LBUTTONDOWN: {
 		LbuttonPressed = true;
 		if (Shape) {
@@ -127,6 +146,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		endPoint.x = LOWORD(lParam);
 		endPoint.y = HIWORD(lParam);
 	}break;
+
 	case WM_MOUSEMOVE:
 	{
 		if (LbuttonPressed) {
@@ -147,11 +167,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				InvalidateRect(hWnd, NULL, TRUE);
 			}
 			if (Shape == 4) {
-				Point3.x = (startPoint.x + endPoint.x) / 2;
-				Point3.y = startPoint.y;
 				ver[0] = { startPoint.x, endPoint.y };
-				ver[1] = { Point3};
-				ver[2] = { endPoint};
+				ver[1] = { (startPoint.x + endPoint.x) / 2, startPoint.y };
+				ver[2] = { endPoint };
 				/* 직각삼각형버전
 				Point3.x = startPoint.x;
 				Point3.y = endPoint.y;
@@ -174,6 +192,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 					ver[i].y = centerY - int(radius * sin(angle));
 					InvalidateRect(hWnd, NULL, TRUE);
 				}
+			}
+			if (Shape == 6) {
+				// 별 모양 그리기
+				int radius = abs(startPoint.x - endPoint.x);
+				int centerX = (startPoint.x + endPoint.x) / 2;
+				int centerY = (startPoint.y + endPoint.y) / 2;
+
+				// 5개의 꼭지점 좌표 계산
+				for (int i = 0; i < 5; i++) {
+					double angle = (2 * 3.14159265358979323846 * i) / 5;
+					star[i].x = centerX + int(radius * cos(angle));
+					star[i].y = centerY - int(radius * sin(angle));
+				}
+				// WM_PAINT 메시지를 유발하여 화면에 그립니다.
+				InvalidateRect(hWnd, NULL, TRUE);
 			}
 		}
 	}
@@ -215,7 +248,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
 
 	HWND hWnd;
-	HWND hButton1, hButton2, hButton3, hButton4, hButton5, hButton6, hButton7, hButton8, hButton9;
+	HWND hButton1, hButton2, hButton3, hButton4, hButton5, hButton6, hButton7, hButton8, hButton9, hButton10, hButton11;
 
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -265,19 +298,27 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	hButton6 = CreateWindow(
 		L"BUTTON", L"빨강", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		20, 370, 100, 50, hWnd, (HMENU)6, hInstance, NULL);
+		20, 370, 90, 50, hWnd, (HMENU)6, hInstance, NULL);
 
 	hButton7 = CreateWindow(
 		L"BUTTON", L"파랑", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		20, 440, 100, 50, hWnd, (HMENU)7, hInstance, NULL);
+		20, 440, 90, 50, hWnd, (HMENU)7, hInstance, NULL);
 
 	hButton8 = CreateWindow(
 		L"BUTTON", L"초록", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		20, 510, 100, 50, hWnd, (HMENU)8, hInstance, NULL);
+		20, 510, 90, 50, hWnd, (HMENU)8, hInstance, NULL);
 
 	hButton9 = CreateWindow(
 		L"BUTTON", L"노랑", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		150, 370, 100, 50, hWnd, (HMENU)9, hInstance, NULL);
+		120, 370, 90, 50, hWnd, (HMENU)9, hInstance, NULL);
+
+	hButton10 = CreateWindow(
+		L"BUTTON", L"하늘색", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		120, 440, 90, 50, hWnd, (HMENU)10, hInstance, NULL);
+
+	hButton11 = CreateWindow(
+		L"BUTTON", L"별", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		120, 510, 90, 50, hWnd, (HMENU)11, hInstance, NULL);
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);

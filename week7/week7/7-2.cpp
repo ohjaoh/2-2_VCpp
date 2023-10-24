@@ -54,6 +54,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			Shape = 0;
 			color = 3;
 		}
+		else if (LOWORD(wParam) == 9) {
+			// 노랑버튼 클릭
+			Shape = 0;
+			color = 4;
+		}
 		break;
 
 	case WM_PAINT: {
@@ -71,6 +76,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		}
 		else if (color == 3) {
 			HBRUSH hBrush = CreateSolidBrush(RGB(0, 255, 0));
+			SelectObject(hdc, hBrush);
+		}
+		else if (color == 4) {
+			HBRUSH hBrush = CreateSolidBrush(RGB(255, 255, 0));
 			SelectObject(hdc, hBrush);
 		}
 		else {
@@ -206,7 +215,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
 
 	HWND hWnd;
-	HWND hButton1, hButton2, hButton3, hButton4, hButton5, hButton6, hButton7, hButton8;
+	HWND hButton1, hButton2, hButton3, hButton4, hButton5, hButton6, hButton7, hButton8, hButton9;
 
 	WNDCLASSEX wcex;
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -263,8 +272,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		20, 440, 100, 50, hWnd, (HMENU)7, hInstance, NULL);
 
 	hButton8 = CreateWindow(
-		L"BUTTON", L"그린", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		L"BUTTON", L"초록", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		20, 510, 100, 50, hWnd, (HMENU)8, hInstance, NULL);
+
+	hButton9 = CreateWindow(
+		L"BUTTON", L"노랑", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		150, 370, 100, 50, hWnd, (HMENU)9, hInstance, NULL);
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);

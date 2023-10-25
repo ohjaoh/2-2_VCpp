@@ -6,12 +6,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 int margin = 8;
 int padding = 8;
 
-HWND box;
+RECT box;
 HWND buttons[5]; // 5개의 버튼을 저장할 배열
 HWND drawingView; // 드로잉 뷰 핸들
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     HBRUSH hBrush_background = CreateSolidBrush(RGB(255, 240, 200));
+    HBRUSH hBrush_white= CreateSolidBrush(RGB(255, 255, 255));
 
     // 윈도우 클래스 등록
     WNDCLASS wc = {};
@@ -21,9 +22,25 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.lpszClassName = L"MyWindowClass";
+    wc.hbrBackground = hBrush_background;
 
     RegisterClass(&wc);
 
+    /*
+    WNDCLASS drawingViewClass = {}; 
+	WCHAR szDrawingViewClass[] = L"DrawingViewClass";
+
+	drawingViewClass.style = CS_HREDRAW | CS_VREDRAW;
+	drawingViewClass.lpfnWndProc = WndProc;
+	drawingViewClass.hInstance = hInstance;
+	drawingViewClass.hCursor = LoadCursor(NULL, IDC_CROSS); // 커서 설정
+	drawingViewClass.lpszClassName = szDrawingViewClass;
+	drawingViewClass.hbrBackground = CreateSolidBrush(RGB(255, 255, 255)); // 두 번째 클래스의 배경색 설정
+
+	RegisterClass(&drawingViewClass);
+
+
+    */
     // 윈도우 생성
     HWND hWnd = CreateWindow(
         L"MyWindowClass", L"곰돌이",
@@ -35,61 +52,17 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         return -1;
     }
 
-    SetClassLongPtr(hWnd, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush_background);
-
-    // View Box 생성
-    box = CreateWindow(
-        L"STATIC", L"",
-        WS_CHILD | WS_VISIBLE | SS_SUNKEN,
-        margin, margin, 800 - 2 * margin, 480 - 2 * margin,
-        hWnd, nullptr, hInstance, nullptr
-    );
-
-    if (!box) {
-        return -1;
-    }
-    SetClassLongPtr(box, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush_background);
-
-    // 박스 뷰의 크기 얻기
-    RECT boxRect;
-    GetClientRect(box, &boxRect);
-
-    // 버튼 생성
-    for (int i = 0; i < 5; i++) {
-        margin = 16;
-        buttons[i] = CreateWindow(
-            L"BUTTON", L"Button",
-            WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, // 버튼 스타일을 BS_PUSHBUTTON으로 변경
-            boxRect.left + margin + i * (boxRect.right - 2 * margin) / 5, boxRect.top + margin,
-            (boxRect.right - 2 * margin) / 5 - 2 * margin, 64, // 버튼 크기를 160x64로 조정
-            box, nullptr, hInstance, nullptr
-        );
-        int margin = 8;
-    }
-
-    if (!buttons[0]) {
-        return -1;
-    }
-
     // 드로잉 뷰 생성
     drawingView = CreateWindow(
         L"STATIC", L"", // 드로잉 뷰의 제목을 설정
         WS_CHILD | WS_VISIBLE | SS_SUNKEN, // 스타일을 설정
-        16, 96, boxRect.right - 2 * margin, boxRect.bottom - 2 * margin, // 크기 설정
-        box, nullptr, hInstance, nullptr
+        16, 96, 784 - 2 * margin, 464 - 2 * margin, // 크기 설정
+       nullptr , nullptr, hInstance, nullptr
     );
 
     if (!drawingView) {
         return -1;
     }
-
-    // 드로잉 뷰 배경색 설정 (흰색)
-    HBRUSH hBrush_drawing = CreateSolidBrush(RGB(255, 255, 255)); // 흰색 배경
-    SetClassLongPtr(drawingView, GCLP_HBRBACKGROUND, (LONG_PTR)hBrush_drawing);
-
-    // 마우스 커서를 크로스(CROSS) 모양으로 변경
-    HCURSOR hCursor = LoadCursor(nullptr, IDC_CROSS);
-    SetClassLongPtr(drawingView, GCLP_HCURSOR, (LONG_PTR)hCursor);
 
     // 윈도우를 표시
     ShowWindow(hWnd, nCmdShow);
@@ -105,8 +78,18 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     return (int)msg.wParam;
 }
 
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    switch (message) {
+LRESULT CALLBACK WndProc(HWND hWnd, UINT Wndmsg, WPARAM wParam, LPARAM lParam) {
+    switch (Wndmsg) {
+    case WM_GETMINMAXINFO: // 창 크기 정보
+    {
+        MINMAXINFO* minMaxInfo = (MINMAXINFO*)lParam;
+        minMaxInfo->ptMinTrackSize.x = 800; // 최소 너비와 최대를 같게 하여 고정
+        minMaxInfo->ptMinTrackSize.y = 480; // 최소 높이와 최대를 같게 하여 고정
+        minMaxInfo->ptMaxTrackSize.x = 800; // 최대 너비
+        minMaxInfo->ptMaxTrackSize.y = 480; // 최대 높이
+        return 0;
+    }
+    return 0;
     case WM_CLOSE:
         // 윈도우 닫기 버튼 클릭 시 프로세스 종료
         PostQuitMessage(0);
@@ -115,21 +98,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
     {
         HDC hdcStatic = (HDC)wParam;
         HWND hwndStatic = (HWND)lParam;
-
-        if (hwndStatic == box) {
-            // 박스뷰 배경색 설정
-            SetBkColor(hdcStatic, RGB(255, 240, 200)); // RGB(255, 240, 200)로 배경색 설정
-            return (LRESULT)CreateSolidBrush(RGB(255, 240, 200));
-        }
-        else if (hwndStatic == drawingView) {
+       
+       if(hwndStatic == drawingView) {
             // 드로잉 뷰 배경색 설정
-            SetBkColor(hdcStatic, RGB(255, 255, 255)); // 흰색 배경 설정
             return (LRESULT)CreateSolidBrush(RGB(255, 255, 255));
         }
         break;
     }
     default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
+        return DefWindowProc(hWnd, Wndmsg, wParam, lParam);
     }
     return 0;
 }

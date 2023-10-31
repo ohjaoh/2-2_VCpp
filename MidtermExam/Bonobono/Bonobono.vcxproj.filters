@@ -15,15 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="201907022.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="midtest-1.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="midtest-2.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="bonobono.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>

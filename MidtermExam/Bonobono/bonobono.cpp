@@ -5,6 +5,7 @@
 bool LbuttonPressed = false;
 bool isMoving = false;
 bool cubepressed = false;
+bool spacepressed = false;
 bool Bonobono = false;
 // 색상버튼
 int color = 0;
@@ -15,10 +16,7 @@ POINT startPoint = { 0 };
 POINT endPoint = { 0 };
 RECT rectangle1 = { 0,0,0,0 }; // 사각형 초기화
 RECT Eclip = { 0,0,0,0 }; // 원 초기화
-RECT bono = { 200, 200, 600, 600 }; // 보노보노 초기화
-RECT ryan = { 200, 200, 600, 600 }; // 라이언 초기화
 RECT Box = { 8, 8, 792, 472 }; // 테두리
-RECT drawingArea = { 16, 72, 784, 464 };
 HBRUSH hBrush_background = CreateSolidBrush(RGB(255, 240, 200));
 HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));
 
@@ -34,7 +32,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		mmi->ptMinTrackSize.y = rect.bottom - rect.top;
 		mmi->ptMaxTrackSize.x = rect.right - rect.left;
 		mmi->ptMaxTrackSize.y = rect.bottom - rect.top; }
-		return 0;
+						 return 0;
 
 	case WM_COMMAND:
 		if (LOWORD(wParam) == 1) {
@@ -77,7 +75,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
 		SelectObject(hdc, hBrush_background);
 		Rectangle(hdc, Box.left, Box.top, Box.right, Box.bottom);
-		
+
 		EndPaint(hWnd, &ps);
 		break;
 	}
@@ -101,6 +99,13 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			HDC hdc = BeginPaint(drawingView, &ps);
 			HBRUSH bonobono = CreateSolidBrush(RGB(127, 200, 255));
 			SelectObject(hdc, bonobono);
+			if (spacepressed = false) {
+				spacepressed = true;
+			}
+			else {
+				spacepressed = false;
+			}
+
 		}
 		break;
 	case WM_PAINT: {
@@ -121,14 +126,13 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			Ellipse(hdc, Eclip.left, Eclip.top, Eclip.right, Eclip.bottom);
 		}
 
-		if (Bonobono) {// 보노보노
-					// 피부색
+		if (Bonobono && spacepressed == false) {// 보노보노 눈떠
+			// 피부색
 			HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
 			SelectObject(hdc, skinBrush);
 			// 그림의 원형 피부 부분을 그립니다.
 			Ellipse(hdc, 205, 37, 535, 367);
 
-			
 			// 입 색
 			HBRUSH mouthBrush = CreateSolidBrush(RGB(255, 150, 255));
 			SelectObject(hdc, mouthBrush);
@@ -149,6 +153,58 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			// 검은 코 부분
 			Ellipse(hdc, 350, 190, 390, 230);
 
+			// 흰 눈동자
+			SelectObject(hdc, Whites);
+			Ellipse(hdc, 252, 175, 258, 180);
+			Ellipse(hdc, 482, 175, 488, 180);
+
+			//수염
+			MoveToEx(hdc, 340, 225, NULL);
+			LineTo(hdc, 310, 210);
+
+			MoveToEx(hdc, 400, 225, NULL);
+			LineTo(hdc, 430, 210);
+
+			MoveToEx(hdc, 340, 235, NULL);
+			LineTo(hdc, 310, 250);
+
+			MoveToEx(hdc, 400, 235, NULL);
+			LineTo(hdc, 430, 250);
+			// 사용한 브러시 리소스를 해제합니다.
+			DeleteObject(skinBrush);
+			DeleteObject(mouthBrush);
+
+			EndPaint(drawingView, &ps);
+		}
+		else if (Bonobono && spacepressed == true) {// 보노보노 눈감아
+			// 피부색
+			HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
+			SelectObject(hdc, skinBrush);
+			// 그림의 원형 피부 부분을 그립니다.
+			Ellipse(hdc, 205, 37, 535, 367);
+
+
+			// 입 색
+			HBRUSH mouthBrush = CreateSolidBrush(RGB(255, 150, 255));
+			SelectObject(hdc, mouthBrush);
+			Ellipse(hdc, 350, 195, 390, 320);
+
+			// 흰 코 부분
+			HBRUSH Whites = CreateSolidBrush(RGB(255, 255, 255));
+			SelectObject(hdc, Whites);
+			Ellipse(hdc, 320, 210, 370, 250);
+			Ellipse(hdc, 370, 210, 420, 250);
+
+			// 눈 부분 
+			//왼눈
+			MoveToEx(hdc, 250, 170, NULL);
+			LineTo(hdc, 220, 210);
+			//오른눈
+			MoveToEx(hdc, 490, 170, NULL);
+			LineTo(hdc, 510, 210);
+
+			// 검은 코 부분
+			Ellipse(hdc, 350, 190, 390, 230);
 
 			// 흰 눈동자
 			SelectObject(hdc, Whites);
@@ -301,7 +357,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	if (!RegisterClassEx(&wcex)) {
 		exit(-1);
 	}
-	
+
 	// Window viewport 영역 조정
 	RECT rect = { 0, 0, 800, 480 };
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, 0);

@@ -20,6 +20,7 @@ RECT ryan = { 200, 200, 600, 600 }; // 라이언 초기화
 RECT Box = { 8, 8, 792, 472 }; // 테두리
 RECT drawingArea = { 16, 72, 784, 464 };
 HBRUSH hBrush_background = CreateSolidBrush(RGB(255, 240, 200));
+HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));
 
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -37,12 +38,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
 	case WM_COMMAND:
 		if (LOWORD(wParam) == 1) {
+			rectangle1 = { 0,0,0,0 };
 			// 첫 번째 버튼 클릭
 			Bonobono = false;
 			Shape = 1;
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		else if (LOWORD(wParam) == 2) {
+			Eclip = { 0,0,0,0 };
 			// 두 번째 버튼 클릭
 			Bonobono = false;
 			Shape = 2;
@@ -91,13 +94,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 }
 
 
-LRESULT CALLBACK CustomDrawingProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK CustomDrawingProc(HWND drawingView, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_KEYDOWN:
 		if (wParam == VK_SPACE)
 		{
 			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(hWnd, &ps);
+			HDC hdc = BeginPaint(drawingView, &ps);
 			HBRUSH bonobono = CreateSolidBrush(RGB(127, 200, 255));
 			SelectObject(hdc, bonobono);
 		}
@@ -106,11 +109,8 @@ LRESULT CALLBACK CustomDrawingProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
 		RECT rect;
 		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hWnd, &ps);
-		FillRect(hdc, &rect, hBrush_background);
-
-		HBRUSH hBrush = CreateSolidBrush(RGB(255, 100, 255));
-		SelectObject(hdc, hBrush);
+		HDC hdc = BeginPaint(drawingView, &ps);
+		FillRect(hdc, &rect, hBrush_background1);
 
 
 
@@ -171,11 +171,10 @@ LRESULT CALLBACK CustomDrawingProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 			DeleteObject(skinBrush);
 			DeleteObject(mouthBrush);
 
-			EndPaint(hWnd, &ps);
+			EndPaint(drawingView, &ps);
 		}
 
-		DeleteObject(hBrush);
-		EndPaint(hWnd, &ps);
+		EndPaint(drawingView, &ps);
 		break;
 	}
 				 break;
@@ -223,7 +222,7 @@ LRESULT CALLBACK CustomDrawingProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 				Eclip.right = max(startPoint.x, endPoint.x);
 				Eclip.bottom = max(startPoint.y, endPoint.y);
 				// WM_PAINT 메시지를 유발하여 화면에 그립니다.
-				InvalidateRect(hWnd, NULL, TRUE);
+				InvalidateRect(drawingView, NULL, TRUE);
 			}
 		}
 		if (isMoving)
@@ -257,7 +256,7 @@ LRESULT CALLBACK CustomDrawingProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 
 
 			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
-			InvalidateRect(hWnd, NULL, TRUE);
+			InvalidateRect(drawingView, NULL, TRUE);
 			startPoint.x = mouseX;
 			startPoint.y = mouseY;
 
@@ -274,7 +273,7 @@ LRESULT CALLBACK CustomDrawingProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 	return 0;
 
 	default:
-		return CallWindowProc(DefWindowProc, hWnd, message, wParam, lParam);
+		return CallWindowProc(DefWindowProc, drawingView, message, wParam, lParam);
 	}
 	return 0;
 }

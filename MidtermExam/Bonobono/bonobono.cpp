@@ -1,4 +1,3 @@
-#include <math.h>
 #include <windows.h>
 
 // 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
@@ -7,8 +6,6 @@ bool isMoving = false;
 bool cubepressed = false;
 bool spacepressed = false;
 bool Bonobono = false;
-// 색상버튼
-int color = 0;
 int Shape = 0;
 
 // 그리는데 필요한 녀석들
@@ -109,20 +106,19 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		}
 		break;
 	case WM_PAINT: {
-
 		RECT rect;
+		GetClientRect(drawingView, &rect);
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(drawingView, &ps);
 		FillRect(hdc, &rect, hBrush_background1);
 
 
-
 		if (Shape == 1) {
-			FillRect(hdc, &rect, (HBRUSH)(hBrush_background));
+			FillRect(hdc, &rect, (HBRUSH)(hBrush_background1));
 			Rectangle(hdc, rectangle1.left, rectangle1.top, rectangle1.right, rectangle1.bottom);
 		}
 		if (Shape == 2) {
-			FillRect(hdc, &rect, (HBRUSH)(hBrush_background));
+			FillRect(hdc, &rect, (HBRUSH)(hBrush_background1));
 			Ellipse(hdc, Eclip.left, Eclip.top, Eclip.right, Eclip.bottom);
 		}
 
@@ -272,7 +268,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 				rectangle1.top = min(startPoint.y, endPoint.y);
 				rectangle1.right = max(startPoint.x, endPoint.x);
 				rectangle1.bottom = max(startPoint.y, endPoint.y);
-				// 사각형 크기 및 위치 설정
+				// 원의 크기 및 위치 설정
 				Eclip.left = min(startPoint.x, endPoint.x);
 				Eclip.top = min(startPoint.y, endPoint.y);
 				Eclip.right = max(startPoint.x, endPoint.x);
@@ -296,21 +292,28 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			rectangle1.right += deltaX;
 			rectangle1.bottom += deltaY;
 
-			double scaleFactor;
-			if (deltaX > 0)
-				scaleFactor = pow(2.0, deltaX / 100.0);     // 오른쪽으로 이동할 때마다 크기를 2배씩 증가시킵니다.
-			else if (deltaX < 0)
-				scaleFactor = pow(0.5, abs(deltaX) / 100.0); // 왼쪽으로 이동할 때마다 크기를 절반으로 줄입니다.
-			else
-				scaleFactor = 1.0;                            // 가로 이동이 없을 경우 크기는 변하지 않습니다.
+			double scaleFactor = 1;
+			if (deltaX > 0) {
+				scaleFactor = 1.0 + static_cast<double>(deltaX) / 100.0;  // 오른쪽으로 이동할 때마다 크기를 증가시킵니다.
+			}
+			else if (deltaX < 0) {
+				scaleFactor = 1.0 / (1.0 - static_cast<double>(deltaX) / 100.0);  // 왼쪽으로 이동할 때마다 크기를 감소시킵니다.
+			}
+			else {
+				scaleFactor = 1.0;  // 가로 이동이 없을 경우 크기는 변하지 않습니다.
+			}
+			int width = Eclip.right - Eclip.left;
+			int height = Eclip.bottom - Eclip.top;
+			int centerX = Eclip.left + width / 2;
+			int centerY = Eclip.top + height / 2;
 
-			// 비율에 따라 원의 좌표 업데이트
-			Eclip.left -= static_cast<int>((Eclip.right - Eclip.left) * (scaleFactor - 1));
-			Eclip.top -= static_cast<int>((Eclip.bottom - Eclip.top) * (scaleFactor - 1));
-			Eclip.right += static_cast<int>((Eclip.right - Eclip.left) * scaleFactor);
-			Eclip.bottom += static_cast<int>((Eclip.bottom - Eclip.top) * scaleFactor);
+			width = static_cast<int>(width * scaleFactor);
+			height = static_cast<int>(height * scaleFactor);
 
-
+			Eclip.left = centerX - width / 2;
+			Eclip.top = centerY - height / 2;
+			Eclip.right = Eclip.left + width;
+			Eclip.bottom = Eclip.top + height;
 			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
 			InvalidateRect(drawingView, NULL, TRUE);
 			startPoint.x = mouseX;

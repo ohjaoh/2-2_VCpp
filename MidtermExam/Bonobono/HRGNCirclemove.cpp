@@ -6,10 +6,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 HRGN hRegion;
 bool isDragging = false;
 POINT dragStartPoint;
-RECT ellipseRect = { 50, 50, 200, 200 };
+RECT circleRect = { 50, 50, 200, 200 };
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
+int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow) {
     // Register the window class.
     const wchar_t CLASS_NAME[] = L"Sample Window Class";
 
@@ -24,7 +23,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     HWND hwnd = CreateWindowEx(
         0,
         CLASS_NAME,
-        L"Drag to Resize Circle",
+        L"Drag Circle",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, 300, 300,
         NULL,
@@ -53,7 +52,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg) {
     case WM_CREATE:
-        hRegion = CreateEllipticRgn(ellipseRect.left, ellipseRect.top, ellipseRect.right, ellipseRect.bottom);
+        hRegion = CreateEllipticRgn(circleRect.left, circleRect.top, circleRect.right, circleRect.bottom);
         return 0;
 
     case WM_DESTROY:
@@ -66,12 +65,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
 
-        // 배경을 흰색으로 채웁니다.
+        // Set background color to white and clear the background
         HBRUSH whiteBrush = CreateSolidBrush(RGB(255, 255, 255));
         FillRect(hdc, &ps.rcPaint, whiteBrush);
         DeleteObject(whiteBrush);
 
-        // 원을 그립니다.
+        // Draw the circle
         HBRUSH redBrush = CreateSolidBrush(RGB(255, 0, 0));
         FillRgn(hdc, hRegion, redBrush);
         DeleteObject(redBrush);
@@ -94,22 +93,16 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEMOVE:
         if (isDragging) {
             int dx = LOWORD(lParam) - dragStartPoint.x;
+            int dy = HIWORD(lParam) - dragStartPoint.y;
 
-            // 원을 확대/축소
-            if (dx > 0) {
-                ellipseRect.right += dx;
-                ellipseRect.bottom += dx;
-            }
-            else if (dx < 0) {
-                ellipseRect.right += dx;
-                ellipseRect.bottom += dx;
-            }
-
-            // 새로운 지역을 생성
+            HRGN newRegion = CreateRectRgn(0, 0, 0, 0);
+            CombineRgn(newRegion, hRegion, NULL, RGN_COPY);
+            OffsetRgn(newRegion, dx, dy);
             DeleteObject(hRegion);
-            hRegion = CreateEllipticRgn(ellipseRect.left, ellipseRect.top, ellipseRect.right, ellipseRect.bottom);
+            hRegion = newRegion;
 
-            dragStartPoint.x = LOWORD(lParam);
+            dragStartPoint.x += dx;
+            dragStartPoint.y += dy;
 
             InvalidateRect(hwnd, NULL, TRUE);
         }
@@ -121,6 +114,33 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             ReleaseCapture();
         }
         return 0;
+
+    case WM_RBUTTONDOWN:
+    {
+        POINT pt = { LOWORD(lParam), HIWORD(lParam) };
+        if (PtInRegion(hRegion, pt.x, pt.y)) {
+            int width = circleRect.right - circleRect.left;
+            int height = circleRect.bottom - circleRect.top;
+            int centerX = (circleRect.left + circleRect.right) / 2;
+            int centerY = (circleRect.top + circleRect.bottom) / 2;
+
+            int dx = pt.x - centerX;
+            double factor = 1.0 + dx * 0.01;
+            int newWidth = (int)(width * sqrt(factor));
+            int newHeight = (int)(height * sqrt(factor));
+
+            circleRect.left = centerX - newWidth / 2;
+            circleRect.top = centerY - newHeight / 2;
+            circleRect.right = centerX + newWidth / 2;
+            circleRect.bottom = centerY + newHeight / 2;
+
+            DeleteObject(hRegion);
+            hRegion = CreateEllipticRgn(circleRect.left, circleRect.top, circleRect.right, circleRect.bottom);
+
+            InvalidateRect(hwnd, NULL, TRUE);
+        }
+    }
+    return 0;
     }
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);

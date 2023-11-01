@@ -18,7 +18,10 @@
     <ClCompile Include="bonobono.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Ciclemove.cpp">
+    <ClCompile Include="RECTCiclemove.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="HRGNCirclemove.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

@@ -51,6 +51,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     if (!hWnd) {
         return -1;
     }
+    if (!drawingView) {
+        return -1;
+    }
+
 
     // 드로잉 뷰 생성
     drawingView = CreateWindow(
@@ -59,10 +63,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
         16, 96, 784 - 2 * margin, 464 - 2 * margin, // 크기 설정
        nullptr , nullptr, hInstance, nullptr
     );
-
-    if (!drawingView) {
-        return -1;
-    }
 
     // 윈도우를 표시
     ShowWindow(hWnd, nCmdShow);

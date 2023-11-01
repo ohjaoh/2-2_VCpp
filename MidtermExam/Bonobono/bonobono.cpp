@@ -17,13 +17,23 @@ RECT rectangle1 = { 0,0,0,0 }; // 사각형 초기화
 RECT Eclip = { 0,0,0,0 }; // 원 초기화
 RECT bono = { 200, 200, 600, 600 }; // 보노보노 초기화
 RECT ryan = { 200, 200, 600, 600 }; // 라이언 초기화
-RECT Box = { 8, 8, 792, 472 };
+RECT Box = { 8, 8, 792, 472 }; // 테두리
 RECT drawingArea = { 16, 72, 784, 464 };
 HBRUSH hBrush_background = CreateSolidBrush(RGB(255, 240, 200));
 
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
+	case WM_GETMINMAXINFO: {
+		RECT rect = { 0, 0, 800, 480 }; // 원하는 클라이언트 영역의 크기
+		AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
+
+		MINMAXINFO* mmi = (MINMAXINFO*)lParam;
+		mmi->ptMinTrackSize.x = rect.right - rect.left;
+		mmi->ptMinTrackSize.y = rect.bottom - rect.top;
+		mmi->ptMaxTrackSize.x = rect.right - rect.left;
+		mmi->ptMaxTrackSize.y = rect.bottom - rect.top; }
+		return 0;
 
 	case WM_COMMAND:
 		if (LOWORD(wParam) == 1) {
@@ -56,6 +66,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		break;
+	case WM_PAINT: {
+
+		RECT rect;
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hWnd, &ps);
+		FillRect(hdc, &rect, hBrush_background);
+
+
+		SelectObject(hdc, hBrush_background);
+		Rectangle(hdc, Box.left, Box.top, Box.right, Box.bottom);
+
+		EndPaint(hWnd, &ps);
+		break;
+	}
+				 break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+	return 0;
+}
+
+
+LRESULT CALLBACK CustomDrawingProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message) {
 	case WM_KEYDOWN:
 		if (wParam == VK_SPACE)
 		{
@@ -71,10 +108,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
 		FillRect(hdc, &rect, hBrush_background);
-
-
-		SelectObject(hdc, hBrush_background);
-		Rectangle(hdc, Box.left, Box.top, Box.right, Box.bottom);
 
 		HBRUSH hBrush = CreateSolidBrush(RGB(255, 100, 255));
 		SelectObject(hdc, hBrush);
@@ -240,11 +273,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	}
 	return 0;
 
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
 	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		return CallWindowProc(DefWindowProc, hWnd, message, wParam, lParam);
 	}
 	return 0;
 }
@@ -273,7 +303,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	if (!RegisterClassEx(&wcex)) {
 		exit(-1);
-	}// Window viewport 영역 조정
+	}
+	
+	// Window viewport 영역 조정
 	RECT rect = { 0, 0, 800, 480 };
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, 0);
 	int width = rect.right - rect.left;
@@ -291,29 +323,45 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		NULL
 	);
 
+	HWND drawingView = CreateWindow(
+		L"STATIC", L"",
+		WS_CHILD | WS_VISIBLE | SS_NOTIFY, // SS_NOTIFY 스타일을 추가
+		16, 98, 784, 464,
+		hWnd, NULL, // 부모 윈도우의 핸들
+		hInstance, NULL
+	);
+
+	SetWindowLongPtr(drawingView, GWLP_USERDATA, (LONG_PTR)hWnd); // 부모 윈도우 핸들 저장
+	SetWindowLongPtr(drawingView, GWLP_WNDPROC, (LONG_PTR)CustomDrawingProc); // 커스텀 윈도우 프로시저 설정
+
+
+	if (!drawingView) {
+		return -1;
+	}
+
 	if (!hWnd) {
 		return FALSE;
 	}
 
 	hButton1 = CreateWindow(
 		L"BUTTON", L"Box", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		16, 16, 140, 48, hWnd, (HMENU)1, hInstance, NULL);
+		16, 16, 140, 64, hWnd, (HMENU)1, hInstance, NULL);
 
 	hButton2 = CreateWindow(
 		L"BUTTON", L"Circle", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		172, 16, 140, 48, hWnd, (HMENU)2, hInstance, NULL);
+		172, 16, 140, 64, hWnd, (HMENU)2, hInstance, NULL);
 
 	hButton3 = CreateWindow(
 		L"BUTTON", L"Bonobono", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		328, 16, 140, 48, hWnd, (HMENU)3, hInstance, NULL);
+		328, 16, 140, 64, hWnd, (HMENU)3, hInstance, NULL);
 
 	hButton4 = CreateWindow(
 		L"BUTTON", L"Ryan", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		484, 16, 140, 48, hWnd, (HMENU)4, hInstance, NULL);
+		484, 16, 140, 64, hWnd, (HMENU)4, hInstance, NULL);
 
 	hButton5 = CreateWindow(
 		L"BUTTON", L"큐브", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		640, 16, 140, 48, hWnd, (HMENU)5, hInstance, NULL);
+		640, 16, 140, 64, hWnd, (HMENU)5, hInstance, NULL);
 
 
 	ShowWindow(hWnd, nCmdShow);

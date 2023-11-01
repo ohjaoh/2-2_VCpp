@@ -74,12 +74,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		RECT rect;
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
-		FillRect(hdc, &rect, hBrush_background);
-
 
 		SelectObject(hdc, hBrush_background);
 		Rectangle(hdc, Box.left, Box.top, Box.right, Box.bottom);
-
+		
 		EndPaint(hWnd, &ps);
 		break;
 	}
@@ -94,7 +92,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 }
 
 
-LRESULT CALLBACK CustomDrawingProc(HWND drawingView, UINT message, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
 	case WM_KEYDOWN:
 		if (wParam == VK_SPACE)
@@ -128,45 +126,47 @@ LRESULT CALLBACK CustomDrawingProc(HWND drawingView, UINT message, WPARAM wParam
 			HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
 			SelectObject(hdc, skinBrush);
 			// 그림의 원형 피부 부분을 그립니다.
-			Ellipse(hdc, 235, 67, 565, 397);
+			Ellipse(hdc, 205, 37, 535, 367);
 
+			
 			// 입 색
 			HBRUSH mouthBrush = CreateSolidBrush(RGB(255, 150, 255));
 			SelectObject(hdc, mouthBrush);
-			Ellipse(hdc, 380, 225, 420, 350);
+			Ellipse(hdc, 350, 195, 390, 320);
 
 			// 흰 코 부분
 			HBRUSH Whites = CreateSolidBrush(RGB(255, 255, 255));
 			SelectObject(hdc, Whites);
-			Ellipse(hdc, 350, 240, 400, 280);
-			Ellipse(hdc, 400, 240, 450, 280);
+			Ellipse(hdc, 320, 210, 370, 250);
+			Ellipse(hdc, 370, 210, 420, 250);
 
 			// 눈 부분 (눈 색을 특별히 명시하지 않았으므로 기본 검은색을 사용합니다.)
 			HBRUSH Blacks = CreateSolidBrush(RGB(0, 0, 0));
 			SelectObject(hdc, Blacks);
-			Ellipse(hdc, 280, 200, 290, 220);
-			Ellipse(hdc, 520, 200, 510, 220);
+			Ellipse(hdc, 250, 170, 260, 190);
+			Ellipse(hdc, 490, 170, 480, 190);
 
 			// 검은 코 부분
-			Ellipse(hdc, 380, 220, 420, 260);
+			Ellipse(hdc, 350, 190, 390, 230);
+
 
 			// 흰 눈동자
 			SelectObject(hdc, Whites);
-			Ellipse(hdc, 282, 205, 288, 210);
-			Ellipse(hdc, 512, 205, 518, 210);
+			Ellipse(hdc, 252, 175, 258, 180);
+			Ellipse(hdc, 482, 175, 488, 180);
 
 			//수염
-			MoveToEx(hdc, 370, 255, NULL);
-			LineTo(hdc, 340, 240);
+			MoveToEx(hdc, 340, 225, NULL);
+			LineTo(hdc, 310, 210);
 
-			MoveToEx(hdc, 430, 255, NULL);
-			LineTo(hdc, 460, 240);
+			MoveToEx(hdc, 400, 225, NULL);
+			LineTo(hdc, 430, 210);
 
-			MoveToEx(hdc, 370, 265, NULL);
-			LineTo(hdc, 340, 280);
+			MoveToEx(hdc, 340, 235, NULL);
+			LineTo(hdc, 310, 250);
 
-			MoveToEx(hdc, 430, 265, NULL);
-			LineTo(hdc, 460, 280);
+			MoveToEx(hdc, 400, 235, NULL);
+			LineTo(hdc, 430, 250);
 			// 사용한 브러시 리소스를 해제합니다.
 			DeleteObject(skinBrush);
 			DeleteObject(mouthBrush);
@@ -298,8 +298,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	wcex.lpszClassName = L"ButtonWindowClass";
 	wcex.hIconSm = LoadIcon(wcex.hInstance, IDI_APPLICATION);
 
-
-
 	if (!RegisterClassEx(&wcex)) {
 		exit(-1);
 	}
@@ -322,16 +320,32 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		NULL
 	);
 
+	WNDCLASSEX wcexDrawing;
+	wcexDrawing.cbSize = sizeof(WNDCLASSEX);
+	wcexDrawing.style = CS_HREDRAW | CS_VREDRAW;
+	wcexDrawing.lpfnWndProc = drawingViewWndProc; // 드로잉 뷰의 메시지 처리 함수
+	wcexDrawing.cbClsExtra = 0;
+	wcexDrawing.cbWndExtra = 0;
+	wcexDrawing.hInstance = hInstance;
+	wcexDrawing.hIcon = NULL;
+	wcexDrawing.hCursor = LoadCursor(NULL, IDC_CROSS); // 마우스 포인터를 십자가로 설정
+	wcexDrawing.hbrBackground = (HBRUSH)(GetStockObject(WHITE_BRUSH));
+	wcexDrawing.lpszMenuName = NULL;
+	wcexDrawing.lpszClassName = L"DrawingViewClass";
+	wcexDrawing.hIconSm = NULL;
+
+	RegisterClassEx(&wcexDrawing);
+
 	HWND drawingView = CreateWindow(
-		L"STATIC", L"",
-		WS_CHILD | WS_VISIBLE | SS_NOTIFY, // SS_NOTIFY 스타일을 추가
-		16, 98, 784, 464,
-		hWnd, NULL, // 부모 윈도우의 핸들
+		L"DrawingViewClass", L"", // 클래스 이름과 창 제목
+		WS_CHILD | WS_VISIBLE,
+		16, 98, 768, 368, // 위치와 크기
+		hWnd, NULL, // 부모 창과 메뉴 핸들
 		hInstance, NULL
 	);
 
 	SetWindowLongPtr(drawingView, GWLP_USERDATA, (LONG_PTR)hWnd); // 부모 윈도우 핸들 저장
-	SetWindowLongPtr(drawingView, GWLP_WNDPROC, (LONG_PTR)CustomDrawingProc); // 커스텀 윈도우 프로시저 설정
+	SetWindowLongPtr(drawingView, GWLP_WNDPROC, (LONG_PTR)drawingViewWndProc); // 커스텀 윈도우 프로시저 설정
 
 
 	if (!drawingView) {

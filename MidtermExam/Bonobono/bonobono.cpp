@@ -1,14 +1,10 @@
 #include <windows.h>
-#define ID_DRAWING_VIEW 1001
-
 
 // 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
 bool LbuttonPressed = false;
 bool isMoving = false;
-bool cubepressed = false;
 bool SpacePressed = false;
 int Shape = 0;
-
 
 // 그리는데 필요한 녀석들
 POINT startPoint = { 0 };
@@ -16,8 +12,9 @@ POINT endPoint = { 0 };
 RECT rectangle1 = { 0,0,0,0 }; // 사각형 초기화
 RECT Eclip = { 0,0,0,0 }; // 원 초기화
 RECT Box = { 8, 8, 792, 472 }; // 테두리
-HBRUSH hBrush_background = CreateSolidBrush(RGB(255, 240, 200));
-HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));
+
+HBRUSH hBrush_background = CreateSolidBrush(RGB(255, 240, 200)); // 배경브러쉬
+HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));// 흰 배경 브러쉬
 
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
@@ -32,19 +29,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				SpacePressed = true;
 			}
 
-			HWND drawingView = GetDlgItem(hWnd, ID_DRAWING_VIEW);
-			InvalidateRect(drawingView, NULL, TRUE);
+			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		break;
 	case WM_GETMINMAXINFO: {
 		RECT rect = { 0, 0, 800, 480 }; // 원하는 클라이언트 영역의 크기
 		AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
-		MINMAXINFO* mmi = (MINMAXINFO*)lParam;
-		mmi->ptMinTrackSize.x = rect.right - rect.left;
-		mmi->ptMinTrackSize.y = rect.bottom - rect.top;
-		mmi->ptMaxTrackSize.x = rect.right - rect.left;
-		mmi->ptMaxTrackSize.y = rect.bottom - rect.top; }
+		MINMAXINFO* minmax = (MINMAXINFO*)lParam;
+		minmax->ptMinTrackSize.x = rect.right - rect.left;
+		minmax->ptMinTrackSize.y = rect.bottom - rect.top;
+		minmax->ptMaxTrackSize.x = rect.right - rect.left;
+		minmax->ptMaxTrackSize.y = rect.bottom - rect.top; }
 						 return 0;
 
 	case WM_COMMAND:
@@ -125,48 +121,55 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
 			SelectObject(hdc, skinBrush);
 			// 그림의 원형 피부 부분을 그립니다.
-			Ellipse(hdc, 205, 37, 535, 367);
+			Ellipse(hdc, 211, 37, 541, 367);
 
 			// 입 색
 			HBRUSH mouthBrush = CreateSolidBrush(RGB(255, 150, 255));
 			SelectObject(hdc, mouthBrush);
-			Ellipse(hdc, 350, 195, 390, 320);
+			Ellipse(hdc, 356, 195, 396, 320);
 
 			// 흰 코 부분
 			HBRUSH Whites = CreateSolidBrush(RGB(255, 255, 255));
 			SelectObject(hdc, Whites);
-			Ellipse(hdc, 320, 210, 370, 250);
-			Ellipse(hdc, 370, 210, 420, 250);
+			Ellipse(hdc, 326, 210, 376, 250);
+			Ellipse(hdc, 376, 210, 426, 250);
 
 			// 눈 부분 (눈 색을 특별히 명시하지 않았으므로 기본 검은색을 사용합니다.)
 			HBRUSH Blacks = CreateSolidBrush(RGB(0, 0, 0));
 			SelectObject(hdc, Blacks);
-			Ellipse(hdc, 250, 170, 260, 190);
-			Ellipse(hdc, 490, 170, 480, 190);
+			Ellipse(hdc, 256, 170, 266, 190);
+			Ellipse(hdc, 496, 170, 486, 190);
 
 			// 검은 코 부분
-			Ellipse(hdc, 350, 190, 390, 230);
+			Ellipse(hdc, 356, 190, 396, 230);
 
 			// 흰 눈동자
 			SelectObject(hdc, Whites);
-			Ellipse(hdc, 252, 175, 258, 180);
-			Ellipse(hdc, 482, 175, 488, 180);
-
+			Ellipse(hdc, 258, 175, 266, 180);
+			Ellipse(hdc, 488, 175, 496, 180);
 			//수염
-			MoveToEx(hdc, 340, 225, NULL);
-			LineTo(hdc, 310, 210);
+			MoveToEx(hdc, 346, 225, NULL);
+			LineTo(hdc, 316, 210);
 
-			MoveToEx(hdc, 400, 225, NULL);
-			LineTo(hdc, 430, 210);
+			MoveToEx(hdc, 406, 225, NULL);
+			LineTo(hdc, 436, 210);
 
-			MoveToEx(hdc, 340, 235, NULL);
-			LineTo(hdc, 310, 250);
+			MoveToEx(hdc, 346, 235, NULL);
+			LineTo(hdc, 316, 250);
 
-			MoveToEx(hdc, 400, 235, NULL);
-			LineTo(hdc, 430, 250);
+			MoveToEx(hdc, 406, 235, NULL);
+			LineTo(hdc, 436, 250);
 			// 사용한 브러시 리소스를 해제합니다.
 			DeleteObject(skinBrush);
 			DeleteObject(mouthBrush);
+			DeleteObject(Whites);
+			DeleteObject(Blacks);
+
+			/*// 중앙선 나중에 지울것
+			MoveToEx(hdc, 376, 0, NULL);
+			LineTo(hdc, 376, 480);
+			MoveToEx(hdc, 0, 184, NULL);
+			LineTo(hdc, 800, 184);*/
 
 			EndPaint(drawingView, &ps);
 		}
@@ -175,51 +178,59 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
 			SelectObject(hdc, skinBrush);
 			// 그림의 원형 피부 부분을 그립니다.
-			Ellipse(hdc, 205, 37, 535, 367);
+			Ellipse(hdc, 211, 37, 541, 367);
 
 			// 입 색
 			HBRUSH mouthBrush = CreateSolidBrush(RGB(255, 150, 255));
 			SelectObject(hdc, mouthBrush);
-			Ellipse(hdc, 350, 195, 390, 320);
+			Ellipse(hdc, 356, 195, 396, 320);
 
 			// 흰 코 부분
 			HBRUSH Whites = CreateSolidBrush(RGB(255, 255, 255));
 			SelectObject(hdc, Whites);
-			Ellipse(hdc, 320, 210, 370, 250);
-			Ellipse(hdc, 370, 210, 420, 250);
+			Ellipse(hdc, 326, 210, 376, 250);
+			Ellipse(hdc, 376, 210, 426, 250);
 
 			// 눈 부분
 			//왼눈
-			MoveToEx(hdc, 255, 175, NULL);
-			LineTo(hdc, 240, 165);
-			MoveToEx(hdc, 255, 175, NULL);
-			LineTo(hdc, 240, 185);
+			MoveToEx(hdc, 261, 175, NULL);
+			LineTo(hdc, 246, 165);
+			MoveToEx(hdc, 261, 175, NULL);
+			LineTo(hdc, 246, 185);
 			//오른눈
-			MoveToEx(hdc, 485, 175, NULL);
-			LineTo(hdc, 500, 165);
-			MoveToEx(hdc, 485, 175, NULL);
-			LineTo(hdc, 500, 185);
+			MoveToEx(hdc, 491, 175, NULL);
+			LineTo(hdc, 506, 165);
+			MoveToEx(hdc, 491, 175, NULL);
+			LineTo(hdc, 506, 185);
 
 			// 검은 코 부분
 			HBRUSH Blacks = CreateSolidBrush(RGB(0, 0, 0));
 			SelectObject(hdc, Blacks);
-			Ellipse(hdc, 350, 190, 390, 230);
+			Ellipse(hdc, 356, 190, 396, 230);
 
 			//수염
-			MoveToEx(hdc, 340, 225, NULL);
-			LineTo(hdc, 310, 210);
+			MoveToEx(hdc, 346, 225, NULL);
+			LineTo(hdc, 316, 210);
+			
+			MoveToEx(hdc, 406, 225, NULL);
+			LineTo(hdc, 436, 210);
 
-			MoveToEx(hdc, 400, 225, NULL);
-			LineTo(hdc, 430, 210);
+			MoveToEx(hdc, 346, 235, NULL);
+			LineTo(hdc, 316, 250);
 
-			MoveToEx(hdc, 340, 235, NULL);
-			LineTo(hdc, 310, 250);
-
-			MoveToEx(hdc, 400, 235, NULL);
-			LineTo(hdc, 430, 250);
+			MoveToEx(hdc, 406, 235, NULL);
+			LineTo(hdc, 436, 250);
 			// 사용한 브러시 리소스를 해제합니다.
 			DeleteObject(skinBrush);
 			DeleteObject(mouthBrush);
+			DeleteObject(Whites);
+			DeleteObject(Blacks);
+			
+			/*// 중앙선 나중에 지울것
+			MoveToEx(hdc, 376, 0, NULL);
+			LineTo(hdc, 376, 480);
+			MoveToEx(hdc, 0, 184, NULL);
+			LineTo(hdc, 800, 184);*/
 
 			EndPaint(drawingView, &ps);
 		}
@@ -228,20 +239,19 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			// 피부색
 			HBRUSH RskinBrush = CreateSolidBrush(RGB(255, 200, 15));
 			SelectObject(hdc, RskinBrush);
-
 			// 귀부분
 			// 왼귀
-			Ellipse(hdc, 185, 15, 300, 135);
+			Ellipse(hdc, 191, 15, 306, 135);
 			// 오른귀
-			Ellipse(hdc, 440, 15, 555, 135);
+			Ellipse(hdc, 446, 15, 561, 135);
 			// 얼굴
-			Ellipse(hdc, 205, 37, 535, 367);
+			Ellipse(hdc, 211, 37, 541, 367);
 
 			// 눈
 			HBRUSH Blacks = CreateSolidBrush(RGB(0, 0, 0));
 			SelectObject(hdc, Blacks);
 			Ellipse(hdc, 290, 150, 310, 170);
-			Ellipse(hdc, 457, 150, 437, 170);
+			Ellipse(hdc, 462, 150, 442, 170);
 
 			// 눈썹3가닥
 			MoveToEx(hdc, 270, 130, NULL);
@@ -252,12 +262,12 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			LineTo(hdc, 335, 134);
 
 
-			MoveToEx(hdc, 412, 130, NULL);
-			LineTo(hdc, 477, 130);
-			MoveToEx(hdc, 412, 132, NULL);
-			LineTo(hdc, 477, 132);
-			MoveToEx(hdc, 412, 134, NULL);
-			LineTo(hdc, 477, 134);
+			MoveToEx(hdc, 417, 130, NULL);
+			LineTo(hdc, 482, 130);
+			MoveToEx(hdc, 417, 132, NULL);
+			LineTo(hdc, 482, 132);
+			MoveToEx(hdc, 417, 134, NULL);
+			LineTo(hdc, 482, 134);
 
 
 			// 코
@@ -266,9 +276,8 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			Ellipse(hdc, 376, 198, 416, 238);
 			Ellipse(hdc, 336, 198, 376, 238);
 
-
-			/*
-			// 중앙선 나중에 지울것
+			
+			/*// 중앙선 나중에 지울것
 			MoveToEx(hdc, 376, 0, NULL);
 			LineTo(hdc, 376, 480);
 			MoveToEx(hdc, 0, 184, NULL);
@@ -427,32 +436,31 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		NULL
 	);
 
-	WNDCLASSEX wcexDrawing;
-	wcexDrawing.cbSize = sizeof(WNDCLASSEX);
-	wcexDrawing.style = CS_HREDRAW | CS_VREDRAW;
-	wcexDrawing.lpfnWndProc = drawingViewWndProc; // 드로잉 뷰의 메시지 처리 함수
-	wcexDrawing.cbClsExtra = 0;
-	wcexDrawing.cbWndExtra = 0;
-	wcexDrawing.hInstance = hInstance;
-	wcexDrawing.hIcon = NULL;
-	wcexDrawing.hCursor = LoadCursor(NULL, IDC_CROSS); // 마우스 포인터를 십자가로 설정
-	wcexDrawing.hbrBackground = (HBRUSH)(GetStockObject(WHITE_BRUSH));
-	wcexDrawing.lpszMenuName = NULL;
-	wcexDrawing.lpszClassName = L"DrawingViewClass";
-	wcexDrawing.hIconSm = NULL;
+	WNDCLASSEX wcDrawing;
+	wcDrawing.cbSize = sizeof(WNDCLASSEX);
+	wcDrawing.style = CS_HREDRAW | CS_VREDRAW;
+	wcDrawing.lpfnWndProc = drawingViewWndProc; // 드로잉 뷰의 메시지 처리 함수
+	wcDrawing.cbClsExtra = 0;
+	wcDrawing.cbWndExtra = 0;
+	wcDrawing.hInstance = hInstance;
+	wcDrawing.hIcon = NULL;
+	wcDrawing.hCursor = LoadCursor(NULL, IDC_CROSS); // 마우스 포인터를 십자가로 설정
+	wcDrawing.hbrBackground = (HBRUSH)(GetStockObject(WHITE_BRUSH));
+	wcDrawing.lpszMenuName = NULL;
+	wcDrawing.lpszClassName = L"DrawingViewClass";
+	wcDrawing.hIconSm = NULL;
 
-	RegisterClassEx(&wcexDrawing);
+	RegisterClassEx(&wcDrawing);
 
 
 	HWND drawingView = CreateWindow(
 		L"DrawingViewClass", L"", // 클래스 이름과 창 제목
 		WS_CHILD | WS_VISIBLE,
 		16, 98, 768, 368, // 위치와 크기
-		hWnd, (HMENU)ID_DRAWING_VIEW, // 부모 창과 메뉴 핸들
+		hWnd, NULL, // 부모 창과 메뉴 핸들
 		hInstance, NULL
 	);
 
-	HWND hChildView = GetDlgItem(drawingView, ID_DRAWING_VIEW);
 
 	SetWindowLongPtr(drawingView, GWLP_USERDATA, (LONG_PTR)hWnd); // 부모 윈도우 핸들 저장
 	SetWindowLongPtr(drawingView, GWLP_WNDPROC, (LONG_PTR)drawingViewWndProc); // 커스텀 윈도우 프로시저 설정

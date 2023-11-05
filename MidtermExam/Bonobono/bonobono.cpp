@@ -1,12 +1,12 @@
 #include <windows.h>
+#define ID_DRAWING_VIEW 1001
+
 
 // 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
 bool LbuttonPressed = false;
 bool isMoving = false;
 bool cubepressed = false;
-bool spacepressed = false;
-bool Bonobono = false;
-bool Ryan = false;
+bool SpacePressed = false;
 int Shape = 0;
 
 
@@ -22,6 +22,20 @@ HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
+	case WM_KEYDOWN:
+		if (wParam == VK_SPACE)
+		{
+			if(SpacePressed == true) {
+				SpacePressed = false;
+			}
+			else if (SpacePressed == false) {
+				SpacePressed = true;
+			}
+
+			HWND drawingView = GetDlgItem(hWnd, ID_DRAWING_VIEW);
+			InvalidateRect(drawingView, NULL, TRUE);
+		}
+		break;
 	case WM_GETMINMAXINFO: {
 		RECT rect = { 0, 0, 800, 480 }; // 원하는 클라이언트 영역의 크기
 		AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
@@ -37,42 +51,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		if (LOWORD(wParam) == 1) {
 			rectangle1 = { 0,0,0,0 };
 			// 첫 번째 버튼 클릭
-			Bonobono = false;
-			Ryan = false;
 			Shape = 1;
+			SetFocus(hWnd);
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		else if (LOWORD(wParam) == 2) {
 			Eclip = { 0,0,0,0 };
 			// 두 번째 버튼 클릭
-			Bonobono = false;
-			Ryan = false;
 			Shape = 2;
+			SetFocus(hWnd);
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		else if (LOWORD(wParam) == 3) {
 			// 세 번째 버튼 클릭
-			Bonobono = true;
-			Ryan = false;
 			Shape = 3;
+			SetFocus(hWnd);
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		else if (LOWORD(wParam) == 4) {
 			// 네 번째 버튼 클릭
-			Bonobono = false;
-			Ryan = true;
 			Shape = 4;
+			SetFocus(hWnd);
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		else if (LOWORD(wParam) == 5) {
-			Bonobono = false;
-			Ryan = false;
 			Shape = 5;
+			SetFocus(hWnd);
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		break;
 	case WM_PAINT: {
-
 		RECT rect;
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
@@ -96,29 +104,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 
 LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
-	case WM_KEYDOWN:
-		if (wParam == VK_SPACE)
-		{
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(drawingView, &ps);
-			HBRUSH bonobono = CreateSolidBrush(RGB(127, 200, 255));
-			SelectObject(hdc, bonobono);
-			if (spacepressed = false) {
-				spacepressed = true;
-			}
-			else {
-				spacepressed = false;
-			}
-
-		}
-		break;
 	case WM_PAINT: {
 		RECT rect;
 		GetClientRect(drawingView, &rect);
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(drawingView, &ps);
 		FillRect(hdc, &rect, hBrush_background1);
-
 
 		if (Shape == 1) {
 			FillRect(hdc, &rect, (HBRUSH)(hBrush_background1));
@@ -129,7 +120,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			Ellipse(hdc, Eclip.left, Eclip.top, Eclip.right, Eclip.bottom);
 		}
 
-		if (Bonobono && spacepressed == false) {// 보노보노 눈떠
+		if (Shape == 3 && SpacePressed == false) {// 보노보노 눈떠
 			// 피부색
 			HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
 			SelectObject(hdc, skinBrush);
@@ -179,13 +170,12 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 
 			EndPaint(drawingView, &ps);
 		}
-		else if (Bonobono && spacepressed == true) {// 보노보노 눈감아
+		else if (Shape == 3 && SpacePressed == true) {// 보노보노 눈감아
 			// 피부색
 			HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
 			SelectObject(hdc, skinBrush);
 			// 그림의 원형 피부 부분을 그립니다.
 			Ellipse(hdc, 205, 37, 535, 367);
-
 
 			// 입 색
 			HBRUSH mouthBrush = CreateSolidBrush(RGB(255, 150, 255));
@@ -198,21 +188,22 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			Ellipse(hdc, 320, 210, 370, 250);
 			Ellipse(hdc, 370, 210, 420, 250);
 
-			// 눈 부분 
+			// 눈 부분
 			//왼눈
-			MoveToEx(hdc, 250, 170, NULL);
-			LineTo(hdc, 220, 210);
+			MoveToEx(hdc, 255, 175, NULL);
+			LineTo(hdc, 240, 165);
+			MoveToEx(hdc, 255, 175, NULL);
+			LineTo(hdc, 240, 185);
 			//오른눈
-			MoveToEx(hdc, 490, 170, NULL);
-			LineTo(hdc, 510, 210);
+			MoveToEx(hdc, 485, 175, NULL);
+			LineTo(hdc, 500, 165);
+			MoveToEx(hdc, 485, 175, NULL);
+			LineTo(hdc, 500, 185);
 
 			// 검은 코 부분
+			HBRUSH Blacks = CreateSolidBrush(RGB(0, 0, 0));
+			SelectObject(hdc, Blacks);
 			Ellipse(hdc, 350, 190, 390, 230);
-
-			// 흰 눈동자
-			SelectObject(hdc, Whites);
-			Ellipse(hdc, 252, 175, 258, 180);
-			Ellipse(hdc, 482, 175, 488, 180);
 
 			//수염
 			MoveToEx(hdc, 340, 225, NULL);
@@ -233,7 +224,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			EndPaint(drawingView, &ps);
 		}
 
-		if (Ryan) {
+		if (Shape == 4) {
 			// 피부색
 			HBRUSH RskinBrush = CreateSolidBrush(RGB(255, 200, 15));
 			SelectObject(hdc, RskinBrush);
@@ -309,7 +300,6 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			startPoint.x = LOWORD(lParam);
 			startPoint.y = HIWORD(lParam);
 		}
-
 
 	}
 	return 0;
@@ -453,13 +443,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	RegisterClassEx(&wcexDrawing);
 
+
 	HWND drawingView = CreateWindow(
 		L"DrawingViewClass", L"", // 클래스 이름과 창 제목
 		WS_CHILD | WS_VISIBLE,
 		16, 98, 768, 368, // 위치와 크기
-		hWnd, NULL, // 부모 창과 메뉴 핸들
+		hWnd, (HMENU)ID_DRAWING_VIEW, // 부모 창과 메뉴 핸들
 		hInstance, NULL
 	);
+
+	HWND hChildView = GetDlgItem(drawingView, ID_DRAWING_VIEW);
 
 	SetWindowLongPtr(drawingView, GWLP_USERDATA, (LONG_PTR)hWnd); // 부모 윈도우 핸들 저장
 	SetWindowLongPtr(drawingView, GWLP_WNDPROC, (LONG_PTR)drawingViewWndProc); // 커스텀 윈도우 프로시저 설정

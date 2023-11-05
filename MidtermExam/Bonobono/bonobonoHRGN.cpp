@@ -9,6 +9,7 @@ bool Bonobono = false;
 bool Ryan = false;
 int Shape = 0;
 
+
 // 그리는데 필요한 녀석들
 POINT startPoint = { 0 };
 POINT endPoint = { 0 };
@@ -133,53 +134,45 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
 			SelectObject(hdc, skinBrush);
 			// 그림의 원형 피부 부분을 그립니다.
-			Ellipse(hdc, 211, 37, 541, 367);
-			
+			Ellipse(hdc, 205, 37, 535, 367);
+
 			// 입 색
 			HBRUSH mouthBrush = CreateSolidBrush(RGB(255, 150, 255));
 			SelectObject(hdc, mouthBrush);
-			Ellipse(hdc, 356, 195, 396, 320);
+			Ellipse(hdc, 350, 195, 390, 320);
 
 			// 흰 코 부분
 			HBRUSH Whites = CreateSolidBrush(RGB(255, 255, 255));
 			SelectObject(hdc, Whites);
-			Ellipse(hdc, 326, 210, 376, 250);
-			Ellipse(hdc, 376, 210, 426, 250);
+			Ellipse(hdc, 320, 210, 370, 250);
+			Ellipse(hdc, 370, 210, 420, 250);
 
 			// 눈 부분 (눈 색을 특별히 명시하지 않았으므로 기본 검은색을 사용합니다.)
 			HBRUSH Blacks = CreateSolidBrush(RGB(0, 0, 0));
 			SelectObject(hdc, Blacks);
-			Ellipse(hdc, 256, 170, 266, 190);
-			Ellipse(hdc, 496, 170, 486, 190);
-			 
+			Ellipse(hdc, 250, 170, 260, 190);
+			Ellipse(hdc, 490, 170, 480, 190);
+
 			// 검은 코 부분
-			Ellipse(hdc, 356, 190, 396, 230);
+			Ellipse(hdc, 350, 190, 390, 230);
 
 			// 흰 눈동자
 			SelectObject(hdc, Whites);
-			Ellipse(hdc, 258, 175, 266, 180);
-			Ellipse(hdc, 488, 175, 496, 180);
+			Ellipse(hdc, 252, 175, 258, 180);
+			Ellipse(hdc, 482, 175, 488, 180);
 
 			//수염
-			MoveToEx(hdc, 346, 225, NULL);
-			LineTo(hdc, 316, 210);
+			MoveToEx(hdc, 340, 225, NULL);
+			LineTo(hdc, 310, 210);
 
-			MoveToEx(hdc, 406, 225, NULL);
-			LineTo(hdc, 436, 210);
+			MoveToEx(hdc, 400, 225, NULL);
+			LineTo(hdc, 430, 210);
 
-			MoveToEx(hdc, 346, 235, NULL);
-			LineTo(hdc, 316, 250);
+			MoveToEx(hdc, 340, 235, NULL);
+			LineTo(hdc, 310, 250);
 
-			MoveToEx(hdc, 406, 235, NULL);
-			LineTo(hdc, 436, 250);
-
-			/*
-			// 중앙선 나중에 지울것
-			MoveToEx(hdc, 376, 0, NULL);
-			LineTo(hdc, 376, 480);
-			MoveToEx(hdc, 0, 184, NULL);
-			LineTo(hdc, 800, 184);*/
-
+			MoveToEx(hdc, 400, 235, NULL);
+			LineTo(hdc, 430, 250);
 			// 사용한 브러시 리소스를 해제합니다.
 			DeleteObject(skinBrush);
 			DeleteObject(mouthBrush);
@@ -244,7 +237,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			// 피부색
 			HBRUSH RskinBrush = CreateSolidBrush(RGB(255, 200, 15));
 			SelectObject(hdc, RskinBrush);
-			
+
 			// 귀부분
 			// 왼귀
 			Ellipse(hdc, 185, 15, 300, 135);
@@ -282,7 +275,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			Ellipse(hdc, 376, 198, 416, 238);
 			Ellipse(hdc, 336, 198, 376, 238);
 
-			
+
 			/*
 			// 중앙선 나중에 지울것
 			MoveToEx(hdc, 376, 0, NULL);
@@ -290,6 +283,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			MoveToEx(hdc, 0, 184, NULL);
 			LineTo(hdc, 800, 184);*/
 		}
+
 		EndPaint(drawingView, &ps);
 		break;
 	}

@@ -24,7 +24,7 @@
     <ClCompile Include="HRGNCirclemove.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Ryan.cpp">
+    <ClCompile Include="bonobonoHRGN.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

@@ -22,13 +22,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	case WM_KEYDOWN:
 		if (wParam == VK_SPACE)
 		{
-			if(SpacePressed == true) {
-				SpacePressed = false;
-			}
-			else if (SpacePressed == false) {
+			if (SpacePressed == false) {
 				SpacePressed = true;
 			}
 
+			InvalidateRect(hWnd, NULL, TRUE);
+		}
+		break;
+	case WM_KEYUP: 
+		if (wParam == VK_SPACE) {
+			if (SpacePressed == true) {
+				SpacePressed = false;
+			}
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		break;

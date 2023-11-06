@@ -1,1 +1,111 @@
 
+#include <windows.h>
+
+// 전역 변수
+POINT startPoint = { 0, 0 };
+POINT endPoint = { 0, 0 };
+bool isDragging = false;
+
+// 얼굴을 그리는 함수
+void DrawFace(HDC hdc, POINT startPoint, POINT endPoint) {
+    // 얼굴 윤곽(원)을 그립니다.
+    Ellipse(hdc, startPoint.x, startPoint.y, endPoint.x, endPoint.y);
+
+    // 눈, 코, 입을 그립니다.
+    // 얼굴의 가로, 세로 길이를 구합니다.
+    int faceWidth = endPoint.x - startPoint.x;
+    int faceHeight = endPoint.y - startPoint.y;
+
+    // 눈을 그립니다.
+    int eyeWidth = faceWidth / 5;
+    int eyeHeight = faceHeight / 5;
+    int eyeX = startPoint.x + faceWidth / 3;
+    int eyeY = startPoint.y + faceHeight / 3;
+
+    // 왼쪽 눈
+    Ellipse(hdc, eyeX - eyeWidth / 2, eyeY - eyeHeight / 2, eyeX + eyeWidth / 2, eyeY + eyeHeight / 2);
+    // 오른쪽 눈
+    eyeX = endPoint.x - faceWidth / 3;
+    Ellipse(hdc, eyeX - eyeWidth / 2, eyeY - eyeHeight / 2, eyeX + eyeWidth / 2, eyeY + eyeHeight / 2);
+
+    // 코를 그립니다 (삼각형).
+    POINT nose[] = {
+        {startPoint.x + faceWidth / 2, startPoint.y + faceHeight / 2},
+        {startPoint.x + faceWidth / 2 - eyeWidth / 2, startPoint.y + faceHeight / 2 + eyeHeight},
+        {startPoint.x + faceWidth / 2 + eyeWidth / 2, startPoint.y + faceHeight / 2 + eyeHeight}
+    };
+    Polygon(hdc, nose, 3);
+
+    // 입을 그립니다.
+    MoveToEx(hdc, startPoint.x + faceWidth / 3, startPoint.y + faceHeight * 2 / 3, NULL);
+    LineTo(hdc, endPoint.x - faceWidth / 3, startPoint.y + faceHeight * 2 / 3);
+}
+
+// 윈도우 프로시저
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    switch (message) {
+    case WM_LBUTTONDOWN:
+        startPoint.x = LOWORD(lParam);
+        startPoint.y = HIWORD(lParam);
+        endPoint = startPoint;
+        isDragging = true;
+        InvalidateRect(hWnd, NULL, FALSE); // 화면을 다시 그립니다.
+        break;
+
+    case WM_MOUSEMOVE:
+        if (isDragging) {
+            endPoint.x = LOWORD(lParam);
+            endPoint.y = HIWORD(lParam);
+            InvalidateRect(hWnd, NULL, FALSE); // 화면을 다시 그립니다.
+        }
+        break;
+
+    case WM_LBUTTONUP:
+        if (isDragging) {
+            endPoint.x = LOWORD(lParam);
+            endPoint.y = HIWORD(lParam);
+            isDragging = false;
+            InvalidateRect(hWnd, NULL, FALSE); // 화면을 다시 그립니다.
+        }
+        break;
+
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+        DrawFace(hdc, startPoint, endPoint);
+        EndPaint(hWnd, &ps);
+    }
+    break;
+
+    case WM_DESTROY:
+        PostQuitMessage(0);
+        break;
+
+    default:
+        return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+    return 0;
+}
+// WinMain
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    WNDCLASS wc = { 0 };
+    wc.lpfnWndProc = WndProc;
+    wc.hInstance = hInstance;
+    wc.lpszClassName = L"DrawFaceClass";
+
+    RegisterClass(&wc);
+
+    HWND hWnd = CreateWindow(wc.lpszClassName, L"Draw a Face", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 400, 400, NULL, NULL, hInstance, NULL);
+
+    ShowWindow(hWnd, nCmdShow);
+    UpdateWindow(hWnd);
+
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    return (int)msg.wParam;
+}

@@ -74,6 +74,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			Shape = 4;
 			SetFocus(hWnd);
 			InvalidateRect(hWnd, NULL, TRUE);
+			startPoint = { 0 };
+			endPoint = { 0 };
 		}
 		else if (LOWORD(wParam) == 5) {
 			Shape = 5;
@@ -309,13 +311,45 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 
 		}
 
+		if (Shape == 5) {
+			POINT MINPOINT = { 0 };
+			POINT MAXPOINT = { 0 };
+
+			// 얼굴 위치 설정
+			MINPOINT.x = min(startPoint.x, endPoint.x);
+			MINPOINT.y = min(startPoint.y, endPoint.y);
+			MAXPOINT.x = max(startPoint.x, endPoint.x);
+			MAXPOINT.y = max(startPoint.y, endPoint.y);
+
+			int width = abs(MINPOINT.x - MAXPOINT.x);
+			int height = abs(MINPOINT.y - MAXPOINT.y);
+			int centerX = width / 2;
+			int centerY = height / 2;
+			POINT centerPoint = { MINPOINT.x + centerX, MINPOINT.y + centerY };
+
+			MoveToEx(hdc, MINPOINT.x + centerX / 2, MINPOINT.y, NULL);
+			LineTo(hdc, MINPOINT.x, MINPOINT.y + centerY / 2);
+			LineTo(hdc, MAXPOINT.x - centerX / 2, MINPOINT.y + centerY / 2);
+			LineTo(hdc, MAXPOINT.x , MINPOINT.y);
+			LineTo(hdc, MINPOINT.x + centerX / 2, MINPOINT.y);
+
+			MoveToEx(hdc, MINPOINT.x, MINPOINT.y + centerY / 2, NULL);
+			LineTo(hdc, MINPOINT.x, MAXPOINT.y);
+			LineTo(hdc, MAXPOINT.x - centerX / 2, MAXPOINT.y);
+			LineTo(hdc, MAXPOINT.x - centerX / 2, MINPOINT.y + centerY / 2);//하나는 이미 위에서 그려서 생략
+
+			MoveToEx(hdc, MAXPOINT.x, MINPOINT.y, NULL);
+			LineTo(hdc, MAXPOINT.x, MAXPOINT.y - centerY / 2);
+			LineTo(hdc, MAXPOINT.x - centerX / 2, MAXPOINT.y);
+		}
+
 		EndPaint(drawingView, &ps);
 		break;
 	}
 				 break;
 	case WM_LBUTTONDOWN: {
 		LbuttonPressed = true;
-		if (Shape == 1 || Shape == 2 || Shape == 4) {
+		if (Shape == 1 || Shape == 2 || Shape == 4 || Shape == 5) {
 			startPoint.x = LOWORD(lParam);
 			startPoint.y = HIWORD(lParam);
 		}
@@ -343,7 +377,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		if (LbuttonPressed) {
 			endPoint.x = LOWORD(lParam);
 			endPoint.y = HIWORD(lParam);
-			if (Shape == 1 || Shape == 2 || Shape == 4)
+			if (Shape == 1 || Shape == 2 || Shape == 4 || Shape == 5)
 			{
 				// 사각형 크기 및 위치 설정
 				rectangle1.left = min(startPoint.x, endPoint.x);

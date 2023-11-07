@@ -1,0 +1,48 @@
+if (Shape == 4) {
+			// ÇÇºÎ»ö
+			HBRUSH RskinBrush = CreateSolidBrush(RGB(255, 200, 15));
+			SelectObject(hdc, RskinBrush);
+			// ±ÍºÎºÐ
+			// ¿Þ±Í
+			Ellipse(hdc, 191, 15, 306, 135);
+			// ¿À¸¥±Í
+			Ellipse(hdc, 446, 15, 561, 135);
+			// ¾ó±¼
+			Ellipse(hdc, 211, 37, 541, 367);
+
+			// ´«
+			HBRUSH Blacks = CreateSolidBrush(RGB(0, 0, 0));
+			SelectObject(hdc, Blacks);
+			Ellipse(hdc, 290, 150, 310, 170);
+			Ellipse(hdc, 462, 150, 442, 170);
+
+			// ´«½ç3°¡´Ú
+			MoveToEx(hdc, 270, 130, NULL);
+			LineTo(hdc, 335, 130);
+			MoveToEx(hdc, 270, 132, NULL);
+			LineTo(hdc, 335, 132);
+			MoveToEx(hdc, 270, 134, NULL);
+			LineTo(hdc, 335, 134);
+
+
+			MoveToEx(hdc, 417, 130, NULL);
+			LineTo(hdc, 482, 130);
+			MoveToEx(hdc, 417, 132, NULL);
+			LineTo(hdc, 482, 132);
+			MoveToEx(hdc, 417, 134, NULL);
+			LineTo(hdc, 482, 134);
+
+
+			// ÄÚ
+			HBRUSH Whites = CreateSolidBrush(RGB(255, 255, 255));
+			SelectObject(hdc, Whites);
+			Ellipse(hdc, 376, 198, 416, 238);
+			Ellipse(hdc, 336, 198, 376, 238);
+
+			
+			/*// Áß¾Ó¼± ³ªÁß¿¡ Áö¿ï°Í
+			MoveToEx(hdc, 376, 0, NULL);
+			LineTo(hdc, 376, 480);
+			MoveToEx(hdc, 0, 184, NULL);
+			LineTo(hdc, 800, 184);*/
+		}

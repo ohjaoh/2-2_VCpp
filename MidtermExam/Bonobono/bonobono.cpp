@@ -29,7 +29,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			InvalidateRect(hWnd, NULL, TRUE);
 		}
 		break;
-	case WM_KEYUP: 
+	case WM_KEYUP:
 		if (wParam == VK_SPACE) {
 			if (SpacePressed == true) {
 				SpacePressed = false;
@@ -101,7 +101,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	}
 	return 0;
 }
-
 
 LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
@@ -216,7 +215,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			//수염
 			MoveToEx(hdc, 346, 225, NULL);
 			LineTo(hdc, 316, 210);
-			
+
 			MoveToEx(hdc, 406, 225, NULL);
 			LineTo(hdc, 436, 210);
 
@@ -230,7 +229,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			DeleteObject(mouthBrush);
 			DeleteObject(Whites);
 			DeleteObject(Blacks);
-			
+
 			/*// 중앙선 나중에 지울것
 			MoveToEx(hdc, 376, 0, NULL);
 			LineTo(hdc, 376, 480);
@@ -293,14 +292,12 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			MoveToEx(hdc, MINPOINT.x + centerX / 4, MINPOINT.y + centerY / 3 * 2 + 4, NULL);
 			LineTo(hdc, MINPOINT.x + (centerX / 4 * 3), MINPOINT.y + (centerY / 3 * 2) + 4);
 
-
 			MoveToEx(hdc, MAXPOINT.x - centerX / 4, MINPOINT.y + centerY / 3 * 2, NULL);
 			LineTo(hdc, MAXPOINT.x - (centerX / 4 * 3), MINPOINT.y + (centerY / 3 * 2));
 			MoveToEx(hdc, MAXPOINT.x - centerX / 4, MINPOINT.y + centerY / 3 * 2 + 2, NULL);
 			LineTo(hdc, MAXPOINT.x - (centerX / 4 * 3), MINPOINT.y + (centerY / 3 * 2) + 2);
 			MoveToEx(hdc, MAXPOINT.x - centerX / 4, MINPOINT.y + centerY / 3 * 2 + 4, NULL);
 			LineTo(hdc, MAXPOINT.x - (centerX / 4 * 3), MINPOINT.y + (centerY / 3 * 2) + 4);
-
 
 			// 코
 			RECT L_nose = { centerPoint.x - centerX / 5, centerPoint.y, centerPoint.x, centerPoint.y + centerY / 5 };
@@ -318,7 +315,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 				 break;
 	case WM_LBUTTONDOWN: {
 		LbuttonPressed = true;
-		if (Shape == 1 || Shape == 2|| Shape == 4) {
+		if (Shape == 1 || Shape == 2 || Shape == 4) {
 			startPoint.x = LOWORD(lParam);
 			startPoint.y = HIWORD(lParam);
 		}
@@ -489,10 +486,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		hInstance, NULL
 	);
 
-
 	SetWindowLongPtr(drawingView, GWLP_USERDATA, (LONG_PTR)hWnd); // 부모 윈도우 핸들 저장
 	SetWindowLongPtr(drawingView, GWLP_WNDPROC, (LONG_PTR)drawingViewWndProc); // 커스텀 윈도우 프로시저 설정
-
 
 	if (!drawingView) {
 		return -1;
@@ -522,12 +517,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		L"BUTTON", L"큐브", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		640, 16, 140, 64, hWnd, (HMENU)5, hInstance, NULL);
 
-
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
+	// 메시지 루프
 	MSG msg;
-	while (GetMessage(&msg, NULL, 0, 0)) {
+	while (GetMessage(&msg, NULL, 0, 0)) { // get으로 메시지 잡아줌
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}

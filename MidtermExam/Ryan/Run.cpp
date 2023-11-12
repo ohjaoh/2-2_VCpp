@@ -1,4 +1,5 @@
 #include <windows.h>
+#include "yuhanCG.h"
 
 // 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
 bool LbuttonPressed = false;
@@ -122,19 +123,23 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			Ellipse(hdc, Eclip.left, Eclip.top, Eclip.right, Eclip.bottom);
 		}
 
-		void DrawBonobono(HWND hWnd, HDC hdc, int Shape, bool SpacePressed);
+		if (Shape == 3) {
+			DrawBonobono(drawingView, hdc, Shape, SpacePressed);
+		}
 
-		int left = startPoint.x;
-		int top =  startPoint.y;
-		int right = endPoint.x;
-		int bottom = endPoint.y;
-		void DrawRyan(HWND hWnd, HDC hdc, int Shape, int left, int top, int right, int bottom);
+		if (Shape == 4) {
+			int left = startPoint.x;
+			int top = startPoint.y;
+			int right = endPoint.x;
+			int bottom = endPoint.y;
+
+			DrawRyan(drawingView, hdc, Shape, left, top, right, bottom);
+		}
 
 		if (Shape == 5) {
 			POINT MINPOINT = { 0 };
 			POINT MAXPOINT = { 0 };
 
-			// 얼굴 위치 설정
 			MINPOINT.x = min(startPoint.x, endPoint.x);
 			MINPOINT.y = min(startPoint.y, endPoint.y);
 			MAXPOINT.x = max(startPoint.x, endPoint.x);

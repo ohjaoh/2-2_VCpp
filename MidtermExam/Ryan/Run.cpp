@@ -82,6 +82,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 			Shape = 5;
 			SetFocus(hWnd);
 			InvalidateRect(hWnd, NULL, TRUE);
+			startPoint = { 0 };
+			endPoint = { 0 };
 		}
 		break;
 	case WM_PAINT: {
@@ -124,10 +126,12 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		}
 
 		if (Shape == 3) {
+			FillRect(hdc, &rect, (HBRUSH)(hBrush_background1));
 			DrawBonobono(drawingView, hdc, Shape, SpacePressed);
 		}
 
 		if (Shape == 4) {
+			FillRect(hdc, &rect, (HBRUSH)(hBrush_background1));
 			int left = startPoint.x;
 			int top = startPoint.y;
 			int right = endPoint.x;
@@ -201,7 +205,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		if (LbuttonPressed) {
 			endPoint.x = LOWORD(lParam);
 			endPoint.y = HIWORD(lParam);
-			if (Shape == 1 || Shape == 2 || Shape == 4 || Shape == 5)
+			if (Shape == 1 || Shape == 2)
 			{
 				// 사각형 크기 및 위치 설정
 				rectangle1.left = min(startPoint.x, endPoint.x);
@@ -214,6 +218,9 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 				Eclip.right = max(startPoint.x, endPoint.x);
 				Eclip.bottom = max(startPoint.y, endPoint.y);
 				// WM_PAINT 메시지를 유발하여 화면에 그립니다.
+				InvalidateRect(drawingView, NULL, TRUE);
+			}
+			if (Shape == 4 || Shape == 5) {
 				InvalidateRect(drawingView, NULL, TRUE);
 			}
 		}

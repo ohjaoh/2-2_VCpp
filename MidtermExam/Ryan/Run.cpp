@@ -127,7 +127,8 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 
 		if (Shape == 3) {
 			FillRect(hdc, &rect, (HBRUSH)(hBrush_background1));
-			DrawBonobono(drawingView, hdc, Shape, SpacePressed);
+			int blink = SpacePressed;
+			DrawBonobono(drawingView, hdc, blink);
 		}
 
 		if (Shape == 4) {
@@ -137,7 +138,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			int right = endPoint.x;
 			int bottom = endPoint.y;
 
-			DrawRyan(drawingView, hdc, Shape, left, top, right, bottom);
+			DrawRyan(drawingView, hdc, left, top, right, bottom);
 		}
 
 		if (Shape == 5) {

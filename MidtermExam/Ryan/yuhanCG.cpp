@@ -1,7 +1,7 @@
 #include "yuhanCG.h"
 #include <Windows.h>
-void DrawBonobono(HWND drawingView, HDC hdc, int Shape, bool SpacePressed) {
-	if (Shape == 3 && SpacePressed == false) {// 보노보노 눈떠
+void DrawBonobono(HWND drawingView, HDC hdc, int blink) {
+	if (blink == 0 ) {// 보노보노 눈떠
 		PAINTSTRUCT ps;
 		// 피부색
 		HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
@@ -59,7 +59,7 @@ void DrawBonobono(HWND drawingView, HDC hdc, int Shape, bool SpacePressed) {
 
 		EndPaint(drawingView, &ps);
 	}
-	else if (Shape == 3 && SpacePressed == true) {// 보노보노 눈감아
+	else if (blink == 1 ) {// 보노보노 눈감아
 		PAINTSTRUCT ps;
 		// 피부색
 		HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
@@ -123,8 +123,8 @@ void DrawBonobono(HWND drawingView, HDC hdc, int Shape, bool SpacePressed) {
 	}
 }
 
-void DrawRyan(HWND drawingView, HDC hdc, int Shape, int left, int top, int right, int bottom) {
-	if (Shape == 4) { // 라이언은 위치를 전부 계산으로 만들어야함
+void DrawRyan(HWND drawingView, HDC hdc, int left, int top, int right, int bottom) {
+	{ // 라이언은 위치를 전부 계산으로 만들어야함
 		int startPointX = left;
 		int startPointY = top;
 		int endPointX = right;
@@ -195,6 +195,10 @@ void DrawRyan(HWND drawingView, HDC hdc, int Shape, int left, int top, int right
 		SelectObject(hdc, Whites);
 		Ellipse(hdc, L_nose.left, L_nose.top, L_nose.right, L_nose.bottom);
 		Ellipse(hdc, R_nose.left, R_nose.top, R_nose.right, R_nose.bottom);
+
+		DeleteObject(RskinBrush);
+		DeleteObject(Whites);
+		DeleteObject(Blacks);
 
 	}
 }

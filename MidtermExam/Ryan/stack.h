@@ -5,11 +5,9 @@
 class Nod {
 public:
     int shape;     // 데이터를 저장하는 변수
-    POINT start;
-    POINT end;
     Nod* next;   // 다음 노드를 가리키는 포인터
 
-    Nod(int shape, POINT startpo, POINT endpo) : shape(shape),start(startpo),end(endpo),  next(nullptr) {} // 생성자
+    Nod(int shape, POINT startpo, POINT endpo) : shape(shape), next(nullptr) {} // 생성자
 };
 
 // 스택 클래스 정의

@@ -15,35 +15,35 @@ y_Stack::~y_Stack() {
 }
 
 // 스택에 데이터를 추가하는 함수
-void y_Stack::push(MSG data) {
-    Nod* newNod = new Nod(data); // 새 노드 생성
+void y_Stack::push(int shape) {
+    Nod* newNod = new Nod(shape); // 새 노드 생성
     newNod->next = top; // 새 노드의 next를 현재 top으로 설정
     top = newNod; // 새 노드를 새로운 top으로 설정
 }
 
 // 스택에서 데이터를 제거하고 반환하는 함수
-MSG y_Stack::pop() {
+int y_Stack::pop() {
     if (isEmpty()) {
-        MSG emptyMsg = { 0 };
-        return emptyMsg;
+        cout << "y_Stack Underflow" << endl;
+        return -1;
     }
     else {
-        Nod* temp = top;// 현재 top 노드를 임시 저장
-        MSG data = top->data;// top을 다음 노드로 이동
-        top = top->next;// 제거될 데이터 저장
+        Nod* temp = top; // 현재 top 노드를 임시 저장
+        top = top->next; // top을 다음 노드로 이동
+        int poppedData = temp->shape; // 제거될 데이터 저장
         delete temp; // 노드 메모리 해제
-        return data; // 제거된 데이터 반환
+        return poppedData; // 제거된 데이터 반환
     }
 }
 
 // 스택의 맨 위 데이터를 조회하는 함수
-MSG y_Stack::peek() {
+int y_Stack::peek() {
     if (isEmpty()) {
-        MSG emptyMsg = { 0 };
-        return emptyMsg;
+        cout << "y_Stack is Empty" << endl;
+        return -1;
     }
     else {
-        return top->data; // top 데이터 반환
+        return top->shape; // top 데이터 반환
     }
 }
 

@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="stack.h" />
     <ClInclude Include="yuhanCG.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Run.cpp" />
+    <ClCompile Include="stack.cpp" />
     <ClCompile Include="yuhanCG.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

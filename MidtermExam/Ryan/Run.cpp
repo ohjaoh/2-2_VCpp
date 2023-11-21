@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "yuhanCG.h"
+#include"stack.h"
 
 // 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
 bool LbuttonPressed = false;

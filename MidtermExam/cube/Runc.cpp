@@ -203,6 +203,8 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 
 	case WM_MOUSEMOVE:
 	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(drawingView, &ps);
 		if (LbuttonPressed) {
 			endPoint.x = LOWORD(lParam);
 			endPoint.y = HIWORD(lParam);
@@ -227,43 +229,13 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		}
 		if (isMoving)
 		{
-			int mouseX = LOWORD(lParam);
-			int mouseY = HIWORD(lParam);
+			rectangle1 = MoveRactangle(drawingView, hdc, lParam, rectangle1, startPoint);
+			Eclip = ScaleCircle(drawingView, hdc, lParam, Eclip, startPoint);
 
-			// 이전 위치에서 현재 마우스 위치까지 이동한 거리 계산
-			int deltaX = mouseX - startPoint.x;
-			int deltaY = mouseY - startPoint.y;
-
-			// 사각형 이동
-			rectangle1.left += deltaX;
-			rectangle1.top += deltaY;
-			rectangle1.right += deltaX;
-			rectangle1.bottom += deltaY;
-
-			double scaleFactor = 1;
-			if (deltaX > 0) {
-				scaleFactor = 1.0 + static_cast<double>(deltaX) / 100.0;  // 오른쪽으로 이동할 때마다 크기를 증가시킵니다.
-			}
-			else if (deltaX < 0) {
-				scaleFactor = 1.0 / (1.0 - static_cast<double>(deltaX) / 100.0);  // 왼쪽으로 이동할 때마다 크기를 감소시킵니다.
-			}
-			else {
-				scaleFactor = 1.0;  // 가로 이동이 없을 경우 크기는 변하지 않습니다.
-			}
-			int width = Eclip.right - Eclip.left;
-			int height = Eclip.bottom - Eclip.top;
-			int centerX = Eclip.left + width / 2;
-			int centerY = Eclip.top + height / 2;
-
-			width = static_cast<int>(width * scaleFactor);
-			height = static_cast<int>(height * scaleFactor);
-
-			Eclip.left = centerX - width / 2;
-			Eclip.top = centerY - height / 2;
-			Eclip.right = Eclip.left + width;
-			Eclip.bottom = Eclip.top + height;
 			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
 			InvalidateRect(drawingView, NULL, TRUE);
+			int mouseX = LOWORD(lParam);
+			int mouseY = HIWORD(lParam);
 			startPoint.x = mouseX;
 			startPoint.y = mouseY;
 

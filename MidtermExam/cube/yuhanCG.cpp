@@ -202,3 +202,53 @@ void DrawRyan(HWND drawingView, HDC hdc, int left, int top, int right, int botto
 
 	}
 }
+
+RECT MoveRactangle(HWND hWnd, HDC hdc, LPARAM lParam, RECT ractangles, POINT start) {
+
+	int mouseX = LOWORD(lParam);
+	int mouseY = HIWORD(lParam);
+
+	// 이전 위치에서 현재 마우스 위치까지 이동한 거리 계산
+	int deltaX = mouseX - start.x;
+	int deltaY = mouseY - start.y;
+
+	// 사각형 이동
+	ractangles.left += deltaX;
+	ractangles.top += deltaY;
+	ractangles.right += deltaX;
+	ractangles.bottom += deltaY;
+
+	return ractangles;
+}
+
+RECT ScaleCircle(HWND hWnd, HDC hdc, LPARAM lParam, RECT Eclip, POINT start) {
+	int mouseX = LOWORD(lParam);
+	int mouseY = HIWORD(lParam);
+
+	// 이전 위치에서 현재 마우스 위치까지 이동한 거리 계산
+	int deltaX = mouseX - start.x;
+	int deltaY = mouseY - start.y;
+	double scaleFactor = 1;
+	if (deltaX > 0) {
+		scaleFactor = 1.0 + static_cast<double>(deltaX) / 100.0;  // 오른쪽으로 이동할 때마다 크기를 증가시킵니다.
+	}
+	else if (deltaX < 0) {
+		scaleFactor = 1.0 / (1.0 - static_cast<double>(deltaX) / 100.0);  // 왼쪽으로 이동할 때마다 크기를 감소시킵니다.
+	}
+	else {
+		scaleFactor = 1.0;  // 가로 이동이 없을 경우 크기는 변하지 않습니다.
+	}
+	int width = Eclip.right - Eclip.left;
+	int height = Eclip.bottom - Eclip.top;
+	int centerX = Eclip.left + width / 2;
+	int centerY = Eclip.top + height / 2;
+
+	width = static_cast<int>(width * scaleFactor);
+	height = static_cast<int>(height * scaleFactor);
+
+	Eclip.left = centerX - width / 2;
+	Eclip.top = centerY - height / 2;
+	Eclip.right = Eclip.left + width;
+	Eclip.bottom = Eclip.top + height;
+	return Eclip;
+}

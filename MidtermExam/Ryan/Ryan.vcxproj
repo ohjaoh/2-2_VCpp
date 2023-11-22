@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{e68a504c-e0ff-465f-9d0e-77c561e4c7bd}</ProjectGuid>
+    <ProjectGuid>{40b04ed0-024f-41f1-bc22-d1b18c696109}</ProjectGuid>
     <RootNamespace>Ryan</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -127,11 +127,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\user\Desktop\12414124\r\yuhanCG.h" />
+    <ClCompile Include="Run.cpp" />
+    <ClCompile Include="yuhanCG.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\user\Desktop\12414124\r\Run.cpp" />
-    <ClCompile Include="C:\Users\user\Desktop\12414124\r\yuhanCG.cpp" />
+    <ClInclude Include="yuhanCG.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\user\Desktop\12414124\c\yuhanCG.h">
+    <ClInclude Include="yuhanCG.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="C:\Users\user\Desktop\12414124\c\Runc.cpp">
+    <ClCompile Include="Runc.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\user\Desktop\12414124\c\yuhanCG.cpp">
+    <ClCompile Include="yuhanCG.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

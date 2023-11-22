@@ -18,10 +18,17 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="yuhanCG.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Runc.cpp" />
+    <ClCompile Include="yuhanCG.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{c9a51dfb-207a-49af-8bf9-43edcf46893f}</ProjectGuid>
+    <ProjectGuid>{540dd8c2-cea9-4fcd-84e8-62e0780d9ff8}</ProjectGuid>
     <RootNamespace>cube</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -126,13 +133,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="C:\Users\user\Desktop\12414124\c\yuhanCG.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="C:\Users\user\Desktop\12414124\c\Runc.cpp" />
-    <ClCompile Include="C:\Users\user\Desktop\12414124\c\yuhanCG.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

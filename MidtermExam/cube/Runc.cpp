@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "yuhanCG.h"
+#include "cube.h"
 
 // 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
 bool LbuttonPressed = false;
@@ -142,34 +143,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		}
 
 		if (Shape == 5) {
-			POINT MINPOINT = { 0 };
-			POINT MAXPOINT = { 0 };
-
-			MINPOINT.x = min(startPoint.x, endPoint.x);
-			MINPOINT.y = min(startPoint.y, endPoint.y);
-			MAXPOINT.x = max(startPoint.x, endPoint.x);
-			MAXPOINT.y = max(startPoint.y, endPoint.y);
-
-			int width = abs(MINPOINT.x - MAXPOINT.x);
-			int height = abs(MINPOINT.y - MAXPOINT.y);
-			int centerX = width / 2;
-			int centerY = height / 2;
-			POINT centerPoint = { MINPOINT.x + centerX, MINPOINT.y + centerY };
-
-			MoveToEx(hdc, MINPOINT.x + centerX / 2, MINPOINT.y, NULL);
-			LineTo(hdc, MINPOINT.x, MINPOINT.y + centerY / 2);
-			LineTo(hdc, MAXPOINT.x - centerX / 2, MINPOINT.y + centerY / 2);
-			LineTo(hdc, MAXPOINT.x, MINPOINT.y);
-			LineTo(hdc, MINPOINT.x + centerX / 2, MINPOINT.y);
-
-			MoveToEx(hdc, MINPOINT.x, MINPOINT.y + centerY / 2, NULL);
-			LineTo(hdc, MINPOINT.x, MAXPOINT.y);
-			LineTo(hdc, MAXPOINT.x - centerX / 2, MAXPOINT.y);
-			LineTo(hdc, MAXPOINT.x - centerX / 2, MINPOINT.y + centerY / 2);//하나는 이미 위에서 그려서 생략
-
-			MoveToEx(hdc, MAXPOINT.x, MINPOINT.y, NULL);
-			LineTo(hdc, MAXPOINT.x, MAXPOINT.y - centerY / 2);
-			LineTo(hdc, MAXPOINT.x - centerX / 2, MAXPOINT.y);
+			Drawcube4(drawingView,  hdc,  startPoint,  endPoint);
 		}
 
 		EndPaint(drawingView, &ps);
@@ -210,7 +184,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			endPoint.y = HIWORD(lParam);
 			if (Shape == 1 || Shape == 2)
 			{
-				// 사각형 크기 및 위치 설정
+				// 사각형 크기 및 위치 설정 모듈화하기
 				rectangle1.left = min(startPoint.x, endPoint.x);
 				rectangle1.top = min(startPoint.y, endPoint.y);
 				rectangle1.right = max(startPoint.x, endPoint.x);

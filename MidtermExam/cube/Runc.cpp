@@ -293,7 +293,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	HWND drawingView = CreateWindow(
 		L"DrawingViewClass", L"", // 클래스 이름과 창 제목
 		WS_CHILD | WS_VISIBLE,
-		16, 98, 768, 368, // 위치와 크기
+		16, 88, 768, 376, // 위치와 크기 수정
 		hWnd, NULL, // 부모 창과 메뉴 핸들
 		hInstance, NULL
 	);

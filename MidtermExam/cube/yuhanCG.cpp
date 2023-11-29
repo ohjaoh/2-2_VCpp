@@ -7,55 +7,56 @@ void DrawBonobono(HWND drawingView, HDC hdc, int blink) {
 		HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
 		SelectObject(hdc, skinBrush);
 		// 그림의 원형 피부 부분을 그립니다.
-		Ellipse(hdc, 211, 37, 541, 367);
+		Ellipse(hdc, 212, 23, 543, 363);//x+2 y-14
 
 		// 입 색
 		HBRUSH mouthBrush = CreateSolidBrush(RGB(255, 150, 255));
 		SelectObject(hdc, mouthBrush);
-		Ellipse(hdc, 356, 195, 396, 320);
+		Ellipse(hdc, 357, 181, 397, 306);
 
 		// 흰 코 부분
 		HBRUSH Whites = CreateSolidBrush(RGB(255, 255, 255));
 		SelectObject(hdc, Whites);
-		Ellipse(hdc, 326, 210, 376, 250);
-		Ellipse(hdc, 376, 210, 426, 250);
+		Ellipse(hdc, 328, 196, 378, 236);
+		Ellipse(hdc, 378, 196, 426, 236);
 
 		// 눈 부분 (눈 색을 특별히 명시하지 않았으므로 기본 검은색을 사용합니다.)
 		HBRUSH Blacks = CreateSolidBrush(RGB(0, 0, 0));
 		SelectObject(hdc, Blacks);
-		Ellipse(hdc, 256, 170, 266, 190);
-		Ellipse(hdc, 496, 170, 486, 190);
+		Ellipse(hdc, 258, 156, 268, 176);
+		Ellipse(hdc, 498, 156, 488, 176);
 
 		// 검은 코 부분
-		Ellipse(hdc, 356, 190, 396, 230);
+		Ellipse(hdc, 358, 176, 398, 216);
 
 		// 흰 눈동자
 		SelectObject(hdc, Whites);
-		Ellipse(hdc, 258, 175, 266, 180);
-		Ellipse(hdc, 488, 175, 496, 180);
+		Ellipse(hdc, 260, 161, 268, 166);
+		Ellipse(hdc, 490, 161, 498, 166);
 		//수염
-		MoveToEx(hdc, 346, 225, NULL);
-		LineTo(hdc, 316, 210);
+		MoveToEx(hdc, 348, 211, NULL);
+		LineTo(hdc, 318, 196);
 
-		MoveToEx(hdc, 406, 225, NULL);
-		LineTo(hdc, 436, 210);
+		MoveToEx(hdc, 408, 211, NULL);
+		LineTo(hdc, 438, 196);
 
-		MoveToEx(hdc, 346, 235, NULL);
-		LineTo(hdc, 316, 250);
+		MoveToEx(hdc, 348, 221, NULL);
+		LineTo(hdc, 318, 236);
 
-		MoveToEx(hdc, 406, 235, NULL);
-		LineTo(hdc, 436, 250);
+		MoveToEx(hdc, 408, 221, NULL);
+		LineTo(hdc, 438, 236);
 		// 사용한 브러시 리소스를 해제합니다.
 		DeleteObject(skinBrush);
 		DeleteObject(mouthBrush);
 		DeleteObject(Whites);
 		DeleteObject(Blacks);
-
+		//x + 2 y - 14
 		/*// 중앙선 나중에 지울것
 		MoveToEx(hdc, 376, 0, NULL);
 		LineTo(hdc, 376, 480);
-		MoveToEx(hdc, 0, 184, NULL);
-		LineTo(hdc, 800, 184);*/
+		MoveToEx(hdc, 0, 188, NULL);
+		LineTo(hdc, 800, 188);*/
+
 
 		EndPaint(drawingView, &ps);
 	}
@@ -65,48 +66,47 @@ void DrawBonobono(HWND drawingView, HDC hdc, int blink) {
 		HBRUSH skinBrush = CreateSolidBrush(RGB(127, 200, 255));
 		SelectObject(hdc, skinBrush);
 		// 그림의 원형 피부 부분을 그립니다.
-		Ellipse(hdc, 211, 37, 541, 367);
-
+		Ellipse(hdc, 212, 23, 543, 363);
 		// 입 색
 		HBRUSH mouthBrush = CreateSolidBrush(RGB(255, 150, 255));
 		SelectObject(hdc, mouthBrush);
-		Ellipse(hdc, 356, 195, 396, 320);
+		Ellipse(hdc, 357, 181, 397, 306);
 
 		// 흰 코 부분
 		HBRUSH Whites = CreateSolidBrush(RGB(255, 255, 255));
 		SelectObject(hdc, Whites);
-		Ellipse(hdc, 326, 210, 376, 250);
-		Ellipse(hdc, 376, 210, 426, 250);
+		Ellipse(hdc, 328, 196, 378, 236);
+		Ellipse(hdc, 378, 196, 426, 236);
 
 		// 눈 부분
 		//왼눈
-		MoveToEx(hdc, 261, 175, NULL);
-		LineTo(hdc, 246, 165);
-		MoveToEx(hdc, 261, 175, NULL);
-		LineTo(hdc, 246, 185);
+		MoveToEx(hdc, 263, 161, NULL);
+		LineTo(hdc, 248, 151);
+		MoveToEx(hdc, 263, 161, NULL);
+		LineTo(hdc, 248, 171);
 		//오른눈
-		MoveToEx(hdc, 491, 175, NULL);
-		LineTo(hdc, 506, 165);
-		MoveToEx(hdc, 491, 175, NULL);
-		LineTo(hdc, 506, 185);
+		MoveToEx(hdc, 493, 161, NULL);
+		LineTo(hdc, 508, 151);
+		MoveToEx(hdc, 493, 161, NULL);
+		LineTo(hdc, 508, 171);
 
-		// 검은 코 부분
+		// 검은 코 부분//x+2 y-14
 		HBRUSH Blacks = CreateSolidBrush(RGB(0, 0, 0));
 		SelectObject(hdc, Blacks);
-		Ellipse(hdc, 356, 190, 396, 230);
+		Ellipse(hdc, 358, 176, 398, 216);
 
 		//수염
-		MoveToEx(hdc, 346, 225, NULL);
-		LineTo(hdc, 316, 210);
+		MoveToEx(hdc, 348, 211, NULL);
+		LineTo(hdc, 318, 196);
 
-		MoveToEx(hdc, 406, 225, NULL);
-		LineTo(hdc, 436, 210);
+		MoveToEx(hdc, 408, 211, NULL);
+		LineTo(hdc, 438, 196);
 
-		MoveToEx(hdc, 346, 235, NULL);
-		LineTo(hdc, 316, 250);
+		MoveToEx(hdc, 348, 221, NULL);
+		LineTo(hdc, 318, 236);
 
-		MoveToEx(hdc, 406, 235, NULL);
-		LineTo(hdc, 436, 250);
+		MoveToEx(hdc, 408, 221, NULL);
+		LineTo(hdc, 438, 236);
 		// 사용한 브러시 리소스를 해제합니다.
 		DeleteObject(skinBrush);
 		DeleteObject(mouthBrush);
@@ -116,8 +116,8 @@ void DrawBonobono(HWND drawingView, HDC hdc, int blink) {
 		/*// 중앙선 나중에 지울것
 		MoveToEx(hdc, 376, 0, NULL);
 		LineTo(hdc, 376, 480);
-		MoveToEx(hdc, 0, 184, NULL);
-		LineTo(hdc, 800, 184);*/
+		MoveToEx(hdc, 0, 188, NULL);
+		LineTo(hdc, 800, 188);*/
 
 		EndPaint(drawingView, &ps);
 	}

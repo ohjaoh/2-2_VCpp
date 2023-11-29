@@ -143,7 +143,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		}
 
 		if (Shape == 5) {
-			Drawcube4(drawingView,  hdc,  startPoint,  endPoint);
+			Drawcube(drawingView,  hdc,  startPoint,  endPoint);
 		}
 
 		EndPaint(drawingView, &ps);

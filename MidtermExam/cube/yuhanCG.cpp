@@ -17,7 +17,7 @@ void DrawBonobono(HWND drawingView, HDC hdc, int blink) {
 		// 흰 코 부분
 		HBRUSH Whites = CreateSolidBrush(RGB(255, 255, 255));
 		SelectObject(hdc, Whites);
-		Ellipse(hdc, 328, 196, 378, 236);
+		Ellipse(hdc, 328, 196, 378, 236); 
 		Ellipse(hdc, 378, 196, 426, 236);
 
 		// 눈 부분 (눈 색을 특별히 명시하지 않았으므로 기본 검은색을 사용합니다.)
@@ -39,7 +39,7 @@ void DrawBonobono(HWND drawingView, HDC hdc, int blink) {
 
 		MoveToEx(hdc, 408, 211, NULL);
 		LineTo(hdc, 438, 196);
-
+		
 		MoveToEx(hdc, 348, 221, NULL);
 		LineTo(hdc, 318, 236);
 

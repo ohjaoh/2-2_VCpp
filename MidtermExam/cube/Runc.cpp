@@ -14,6 +14,7 @@ POINT endPoint = { 0 };
 RECT rectangle1 = { 0,0,0,0 }; // 사각형 초기화
 RECT Eclip = { 0,0,0,0 }; // 원 초기화
 RECT Box = { 8, 8, 792, 472 }; // 테두리
+HRGN cube = { 0 };
 
 HBRUSH hBrush_background = CreateSolidBrush(RGB(255, 240, 200)); // 배경브러쉬
 HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));// 흰 배경 브러쉬
@@ -143,7 +144,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		}
 
 		if (Shape == 5) {
-			Drawcube(drawingView,  hdc,  startPoint,  endPoint);
+			cube = Drawcube(drawingView, hdc, startPoint, endPoint);
 		}
 
 		EndPaint(drawingView, &ps);
@@ -166,6 +167,12 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 	case WM_RBUTTONDOWN:
 	{
 		if (PtInRect(&rectangle1, { LOWORD(lParam), HIWORD(lParam) })) // 만약 상자내부에서 클릭하면
+		{
+			isMoving = true;
+			startPoint.x = LOWORD(lParam);
+			startPoint.y = HIWORD(lParam);
+		}
+		if (PtInRegion(cube, LOWORD(lParam), HIWORD(lParam)))
 		{
 			isMoving = true;
 			startPoint.x = LOWORD(lParam);
@@ -205,6 +212,8 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		{
 			rectangle1 = MoveRactangle(drawingView, hdc, lParam, rectangle1, startPoint);
 			Eclip = ScaleCircle(drawingView, hdc, lParam, Eclip, startPoint);
+			
+			Movecube(drawingView, hdc, lParam, startPoint);
 
 			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
 			InvalidateRect(drawingView, NULL, TRUE);
@@ -214,6 +223,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			startPoint.y = mouseY;
 
 		}
+
 	}
 	return 0;
 	case WM_RBUTTONUP:

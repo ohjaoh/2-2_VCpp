@@ -1,9 +1,4 @@
 #include <Windows.h>
-struct CubeState
-{
-	POINT go = {0};
-	POINT to = { 0 };
-};
 
 HRGN Drawcube(HWND hWnd, HDC hdc, POINT startPoint, POINT endPoint) {
 	// 중앙선 나중에 지울것
@@ -11,7 +6,7 @@ HRGN Drawcube(HWND hWnd, HDC hdc, POINT startPoint, POINT endPoint) {
 	LineTo(hdc, 376, 480);
 	MoveToEx(hdc, 0, 188, NULL);
 	LineTo(hdc, 800, 188);
-	
+
 	int width = abs(startPoint.x - endPoint.x);
 	int height = abs(startPoint.y - endPoint.y);
 	int centerX = width / 2;
@@ -24,11 +19,6 @@ HRGN Drawcube(HWND hWnd, HDC hdc, POINT startPoint, POINT endPoint) {
 	MINPOINT.y = min(startPoint.y, endPoint.y);
 	MAXPOINT.x = max(startPoint.x, endPoint.x);
 	MAXPOINT.y = max(startPoint.y, endPoint.y);
-
-	CubeState cubestatus; //이동하는 거랑 논리상 꼬여있음 오늘은 여기까지 내일부터 수정
-
-	cubestatus.go = MINPOINT;
-	cubestatus.to = MAXPOINT;
 
 	POINT centerPoint = { MINPOINT.x + centerX, MINPOINT.y + centerY };
 
@@ -56,7 +46,7 @@ HRGN Drawcube(HWND hWnd, HDC hdc, POINT startPoint, POINT endPoint) {
 		   {MINPOINT.x + centerX / 2, MINPOINT.y}, // 5번 꼭짓점
 		   {MINPOINT.x, MINPOINT.y + centerY / 2}  // 6번 꼭짓점
 		};
-		HRGN Hexa = CreatePolygonRgn(hexaPoints, 6,WINDING);
+		HRGN Hexa = CreatePolygonRgn(hexaPoints, 6, WINDING);
 		return Hexa;
 	}
 	if (MINPOINT.x <= 376 && MINPOINT.y >= 188) {//좌하
@@ -142,48 +132,35 @@ HRGN Drawcube(HWND hWnd, HDC hdc, POINT startPoint, POINT endPoint) {
 		return Hexa;
 	}
 }
-void Movecube(HWND hWnd, HDC hdc, LPARAM lParam, POINT start) {
 
-	int mouseX = LOWORD(lParam);
-	int mouseY = HIWORD(lParam);
-	POINT end = { mouseX, mouseY };
-
-	// 이전 위치에서 현재 마우스 위치까지 이동한 거리 계산
-	int deltaX = mouseX - start.x;
-	int deltaY = mouseY - start.y;
-
-	CubeState cubestatus;
-	POINT MINPOINT = { cubestatus.go };
-	POINT MAXPOINT = { cubestatus.to };
-
-	MINPOINT.x += deltaX;
-	MINPOINT.y += deltaY;
-	MAXPOINT.x += deltaX;
-	MAXPOINT.y += deltaY;
-
-	Drawcube(hWnd, hdc, MINPOINT, MAXPOINT);
+void Movecube(POINT* MINPOINT, POINT* MAXPOINT,int deltaX, int deltaY) {
+	MINPOINT->x += deltaX; // MINPOINT의 X 좌표 이동
+	MINPOINT->y += deltaY; // MINPOINT의 Y 좌표 이동
+	MAXPOINT->x += deltaX; // MAXPOINT의 X 좌표 이동
+	MAXPOINT->y += deltaY; // MAXPOINT의 Y 좌표 이동
 }
-void Scalecube(HWND hWnd, HDC hdc, LPARAM lParam, POINT start) {
-	int mouseX = LOWORD(lParam);
-	int mouseY = HIWORD(lParam);
-	POINT end = { mouseX, mouseY };
 
-	// 이전 위치에서 현재 마우스 위치까지 이동한 거리 계산
-	int deltaX = mouseX - start.x;
-	int deltaY = mouseY - start.y;
+void Scalecube(POINT* minPoint, POINT* maxPoint, int deltaX, int deltaY) {
+	double scaleFactor = 1;
+	if (deltaX > 0) {
+		scaleFactor = 1.0 + static_cast<double>(deltaX) / 100.0;  // 오른쪽으로 이동할 때마다 크기를 증가시킵니다.
+	}
+	else if (deltaX < 0) {
+		scaleFactor = 1.0 / (1.0 - static_cast<double>(deltaX) / 100.0);  // 왼쪽으로 이동할 때마다 크기를 감소시킵니다.
+	}
+	else {
+		scaleFactor = 1.0;  // 가로 이동이 없을 경우 크기는 변하지 않습니다.
+	}
+	int width = maxPoint->x - minPoint->x;
+	int height = maxPoint->y - minPoint->y;
+	int centerX = minPoint->x + width / 2;
+	int centerY = minPoint->y + height / 2;
 
-	POINT MINPOINT = { 0 };
-	POINT MAXPOINT = { 0 };
+	width = static_cast<int>(width * scaleFactor);
+	height = static_cast<int>(height * scaleFactor);
 
-	MINPOINT.x = min(start.x, end.x);
-	MINPOINT.y = min(start.y, end.y);
-	MAXPOINT.x = max(start.x, end.x);
-	MAXPOINT.y = max(start.y, end.y);
-	MINPOINT.x += deltaX;
-	MINPOINT.y += deltaY;
-	MAXPOINT.x += deltaX;
-	MAXPOINT.y += deltaY;
-
-	Drawcube(hWnd, hdc, MINPOINT, MAXPOINT);
-
+	minPoint->x = centerX - width / 2;
+	minPoint->y = centerY - height / 2;
+	maxPoint->x = minPoint->x + width;
+	maxPoint->y = minPoint->y + height;
 }

@@ -209,7 +209,7 @@ RECT MoveRactangle(HWND hWnd, HDC hdc, LPARAM lParam, RECT ractangles, POINT sta
 	int mouseY = HIWORD(lParam);
 
 	// 이전 위치에서 현재 마우스 위치까지 이동한 거리 계산
-	int deltaX = mouseX - start.x;
+	int deltaX = mouseX - start.x;//여기서의 start는 WM_RBUTTONDOWN에서 값을 넘겨준 녀석 즉 우클릭이 시작된지점
 	int deltaY = mouseY - start.y;
 
 	// 사각형 이동

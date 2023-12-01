@@ -15,6 +15,7 @@ RECT rectangle1 = { 0,0,0,0 }; // 사각형 초기화
 RECT Eclip = { 0,0,0,0 }; // 원 초기화
 RECT Box = { 8, 8, 792, 472 }; // 테두리
 HRGN cube = { 0 };
+POINT test = { 0 };
 
 HBRUSH hBrush_background = CreateSolidBrush(RGB(255, 240, 200)); // 배경브러쉬
 HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));// 흰 배경 브러쉬
@@ -157,6 +158,11 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			startPoint.x = LOWORD(lParam);
 			startPoint.y = HIWORD(lParam);
 		}
+		if (PtInRegion(cube, LOWORD(lParam), HIWORD(lParam))) {
+			// 여기서 클릭여부판단 변수필요
+			test.x = LOWORD(lParam);
+			test.y = HIWORD(lParam);
+		}
 	}break;
 	case WM_LBUTTONUP: {
 		LbuttonPressed = false;
@@ -166,22 +172,32 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 
 	case WM_RBUTTONDOWN:
 	{
-		if (PtInRect(&rectangle1, { LOWORD(lParam), HIWORD(lParam) })) // 만약 상자내부에서 클릭하면
+		if (PtInRect(&rectangle1, { LOWORD(lParam), HIWORD(lParam) })) // 만약 도형내부에서 클릭하면
 		{
-			isMoving = true;
+			test = { 0 };
+			// 도형내부에 클릭한 지점을 기준으로 사각형을 이동시킴
 			startPoint.x = LOWORD(lParam);
 			startPoint.y = HIWORD(lParam);
+
 		}
-		if (PtInRegion(cube, LOWORD(lParam), HIWORD(lParam)))
-		{
+		if (PtInRegion(cube, LOWORD(lParam), HIWORD(lParam))) {
+			// cube는 lParam으로 startpoint를 변경하면 크기가 변함
 			isMoving = true;
-			startPoint.x = LOWORD(lParam);
-			startPoint.y = HIWORD(lParam);
+			test.x = LOWORD(lParam);
+			test.y = HIWORD(lParam);
 		}
 
 	}
 	return 0;
 
+	case WM_RBUTTONUP:
+	{
+		if (isMoving)
+		{
+			isMoving = false;
+		}
+	}
+	return 0;
 	case WM_MOUSEMOVE:
 	{
 		PAINTSTRUCT ps;
@@ -208,30 +224,28 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 				InvalidateRect(drawingView, NULL, TRUE);
 			}
 		}
+
 		if (isMoving)
 		{
 			rectangle1 = MoveRactangle(drawingView, hdc, lParam, rectangle1, startPoint);
 			Eclip = ScaleCircle(drawingView, hdc, lParam, Eclip, startPoint);
-			
-			Movecube(drawingView, hdc, lParam, startPoint);
 
+			POINT currentPoint;
+			currentPoint.x = LOWORD(lParam);
+			currentPoint.y = HIWORD(lParam);
+			// startPoint와 currentPoint 사이의 차이를 계산
+			int deltaX = 0; deltaX = currentPoint.x - test.x;
+			int deltaY = 0; deltaY = currentPoint.y - test.y;
+
+			// 도형 이동
+			Movecube(&startPoint, &endPoint, deltaX, deltaY);
+			cube = Drawcube(drawingView, hdc, startPoint, endPoint);
+
+			test = currentPoint;
 			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
 			InvalidateRect(drawingView, NULL, TRUE);
-			int mouseX = LOWORD(lParam);
-			int mouseY = HIWORD(lParam);
-			startPoint.x = mouseX;
-			startPoint.y = mouseY;
-
 		}
 
-	}
-	return 0;
-	case WM_RBUTTONUP:
-	{
-		if (isMoving)
-		{
-			isMoving = false;
-		}
 	}
 	return 0;
 

@@ -50,9 +50,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		minmax->ptMinTrackSize.x = rect.right - rect.left;
 		minmax->ptMinTrackSize.y = rect.bottom - rect.top;
 		minmax->ptMaxTrackSize.x = rect.right - rect.left;
-		minmax->ptMaxTrackSize.y = rect.bottom - rect.top; }
+		minmax->ptMaxTrackSize.y = rect.bottom - rect.top;
+	}
 						 return 0;
-
 	case WM_COMMAND:
 		if (LOWORD(wParam) == 1) {
 			rectangle1 = { 0,0,0,0 };
@@ -76,18 +76,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 		}
 		else if (LOWORD(wParam) == 4) {
 			// 네 번째 버튼 클릭
+			startPoint = { 0 };
+			endPoint = { 0 };
 			Shape = 4;
 			SetFocus(hWnd);
 			InvalidateRect(hWnd, NULL, TRUE);
-			startPoint = { 0 };
-			endPoint = { 0 };
 		}
 		else if (LOWORD(wParam) == 5) {
+			startPoint = { 0 };
+			endPoint = { 0 };
 			Shape = 5;
 			SetFocus(hWnd);
 			InvalidateRect(hWnd, NULL, TRUE);
-			startPoint = { 0 };
-			endPoint = { 0 };
 		}
 		break;
 	case WM_PAINT: {
@@ -168,7 +168,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 				startPoint.y = HIWORD(lParam);
 			}
 		}
-		
+
 	}break;
 	case WM_LBUTTONUP: {
 		LbuttonPressed = false;

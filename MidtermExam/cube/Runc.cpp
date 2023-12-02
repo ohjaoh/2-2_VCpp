@@ -15,8 +15,8 @@ POINT endPoint = { 0 };
 RECT rectangle1 = { 0,0,0,0 }; // 사각형 초기화
 RECT Eclip = { 0,0,0,0 }; // 원 초기화
 RECT Box = { 8, 8, 792, 472 }; // 테두리
-HRGN cube = { 0 };
-POINT test = { 0 };
+HRGN cube = NULL;
+POINT standardPoint = { 0 };
 
 HBRUSH hBrush_background = CreateSolidBrush(RGB(255, 240, 200)); // 배경브러쉬
 HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));// 흰 배경 브러쉬
@@ -121,22 +121,16 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		FillRect(hdc, &rect, hBrush_background1);
 
 		if (Shape == 1) {
-			FillRect(hdc, &rect, (HBRUSH)(hBrush_background1));
 			Rectangle(hdc, rectangle1.left, rectangle1.top, rectangle1.right, rectangle1.bottom);
 		}
 		if (Shape == 2) {
-			FillRect(hdc, &rect, (HBRUSH)(hBrush_background1));
 			Ellipse(hdc, Eclip.left, Eclip.top, Eclip.right, Eclip.bottom);
 		}
-
 		if (Shape == 3) {
-			FillRect(hdc, &rect, (HBRUSH)(hBrush_background1));
 			int blink = SpacePressed;
 			DrawBonobono(drawingView, hdc, blink);
 		}
-
 		if (Shape == 4) {
-			FillRect(hdc, &rect, (HBRUSH)(hBrush_background1));
 			int left = startPoint.x;
 			int top = startPoint.y;
 			int right = endPoint.x;
@@ -144,7 +138,6 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 
 			DrawRyan(drawingView, hdc, left, top, right, bottom);
 		}
-
 		if (Shape == 5) {
 			cube = Drawcube(drawingView, hdc, startPoint, endPoint);
 		}
@@ -154,23 +147,31 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 	}
 				 break;
 	case WM_LBUTTONDOWN: {
-		if (Shape == 1 || Shape == 2 || Shape == 4 || Shape == 5) {
-			startPoint.x = LOWORD(lParam);
-			startPoint.y = HIWORD(lParam);
-		}
 		if (PtInRegion(cube, LOWORD(lParam), HIWORD(lParam))) {
 			LbuttonCube = true;
-			test.x = LOWORD(lParam);
-			test.y = HIWORD(lParam);
+			//startpoint로 큐브 내부의 클릭한 좌표저장
 		}
 		else {
 			LbuttonPressed = true;
 		}
+		if (Shape == 1 || Shape == 2 || Shape == 4) {
+			startPoint.x = LOWORD(lParam);
+			startPoint.y = HIWORD(lParam);
+		}
+		if (Shape == 5) {
+			if (LbuttonCube == true) {
+				standardPoint.x = LOWORD(lParam);
+				standardPoint.y = HIWORD(lParam);
+			}
+			else {
+				startPoint.x = LOWORD(lParam);
+				startPoint.y = HIWORD(lParam);
+			}
+		}
+		
 	}break;
 	case WM_LBUTTONUP: {
 		LbuttonPressed = false;
-		endPoint.x = LOWORD(lParam);
-		endPoint.y = HIWORD(lParam);
 		if (LbuttonCube)
 		{
 			LbuttonCube = false;
@@ -185,15 +186,13 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			isMoving = 1;
 			startPoint.x = LOWORD(lParam);
 			startPoint.y = HIWORD(lParam);
-
 		}
 		if (PtInRegion(cube, LOWORD(lParam), HIWORD(lParam))) {
-			// cube는 lParam으로 startpoint를 변경하면 크기가 변함
+			// cube는 lParam으로 startpoint를 변경하면 크기가 변함 그래서 새로운 포인터를 사용함
 			isMoving = 2;
-			test.x = LOWORD(lParam);
-			test.y = HIWORD(lParam);
+			standardPoint.x = LOWORD(lParam);
+			standardPoint.y = HIWORD(lParam);
 		}
-
 	}
 	return 0;
 
@@ -205,6 +204,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		}
 	}
 	return 0;
+
 	case WM_MOUSEMOVE:
 	{
 		PAINTSTRUCT ps;
@@ -214,9 +214,11 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		currentPoint.x = LOWORD(lParam);
 		currentPoint.y = HIWORD(lParam);
 
-		// startPoint와 currentPoint 사이의 차이를 계산
-		int deltaX = 0; deltaX = currentPoint.x - test.x;
-		int deltaY = 0; deltaY = currentPoint.y - test.y;
+		// standardPoint(기준점)와 currentPoint 사이의 차이를 계산
+		int deltaX = 0;
+		int deltaY = 0;
+		deltaX = currentPoint.x - standardPoint.x;
+		deltaY = currentPoint.y - standardPoint.y;
 
 		if (LbuttonPressed) {
 			endPoint.x = LOWORD(lParam);
@@ -226,11 +228,8 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 				rectangle1 = Drawrect(rectangle1, startPoint, endPoint);
 				Eclip = Drawrect(Eclip, startPoint, endPoint);
 				// WM_PAINT 메시지를 유발하여 화면에 그립니다.
-				InvalidateRect(drawingView, NULL, TRUE);
 			}
-			if (Shape == 4 || Shape == 5) {
-				InvalidateRect(drawingView, NULL, TRUE);
-			}
+			InvalidateRect(drawingView, NULL, TRUE);
 		}
 
 		if (isMoving == 1)
@@ -246,21 +245,23 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			// WM_PAINT 메시지를 유발하여 도형을 화면에 그립니다.
 			InvalidateRect(drawingView, NULL, TRUE);
 		}
-		if (isMoving == 2) {
-			// 도형 이동
+		else if (isMoving == 2) {
+			// 큐브 이동
 			Movecube(&startPoint, &endPoint, deltaX, deltaY);
 			cube = Drawcube(drawingView, hdc, startPoint, endPoint);
 
-			test = currentPoint;
+			standardPoint = currentPoint;// 드래그중인 현재 좌표를 기준점에 저장한다.(기준점이 이동한 것)
 			// WM_PAINT 메시지를 유발하여 도형을 화면에 그립니다.
 			InvalidateRect(drawingView, NULL, TRUE);
 		}
-
 		if (LbuttonCube) {
-			ScaleCube(&startPoint, &endPoint, deltaX);
+			// 기준점은 stardPoint고 시작과 끝은 정해져있다.
+			// 큐브 크기 조정
+			ScaleCube(lParam, &startPoint, &endPoint, standardPoint);
 			cube = Drawcube(drawingView, hdc, startPoint, endPoint);
 
-			test = currentPoint;
+			standardPoint = currentPoint;
+			// 드래그중인 현재 좌표를 기준점에 저장한다.(기준점이 이동한 것)
 			// WM_PAINT 메시지를 유발하여 도형을 화면에 그립니다.
 			InvalidateRect(drawingView, NULL, TRUE);
 		}

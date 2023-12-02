@@ -203,7 +203,7 @@ void DrawRyan(HWND drawingView, HDC hdc, int left, int top, int right, int botto
 	}
 }
 
-RECT MoveRactangle(HWND hWnd, HDC hdc, LPARAM lParam, RECT ractangles, POINT start) {
+RECT MoveRactangle(LPARAM lParam, RECT ractangles, POINT start) {
 
 	int mouseX = LOWORD(lParam);
 	int mouseY = HIWORD(lParam);
@@ -221,7 +221,7 @@ RECT MoveRactangle(HWND hWnd, HDC hdc, LPARAM lParam, RECT ractangles, POINT sta
 	return ractangles;
 }
 
-RECT ScaleCircle(HWND hWnd, HDC hdc, LPARAM lParam, RECT Eclip, POINT start) {
+RECT ScaleCircle(LPARAM lParam, RECT Eclip, POINT start) {
 	int mouseX = LOWORD(lParam);
 	int mouseY = HIWORD(lParam);
 
@@ -251,4 +251,13 @@ RECT ScaleCircle(HWND hWnd, HDC hdc, LPARAM lParam, RECT Eclip, POINT start) {
 	Eclip.right = Eclip.left + width;
 	Eclip.bottom = Eclip.top + height;
 	return Eclip;
+}
+
+RECT Drawrect(RECT rect, POINT startPoint, POINT endPoint) {
+	rect.left = min(startPoint.x, endPoint.x);
+	rect.top = min(startPoint.y, endPoint.y);
+	rect.right = max(startPoint.x, endPoint.x);
+	rect.bottom = max(startPoint.y, endPoint.y);
+
+	return rect;
 }

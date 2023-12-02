@@ -133,7 +133,7 @@ HRGN Drawcube(HWND hWnd, HDC hdc, POINT startPoint, POINT endPoint) {
 	}
 }
 
-void Movecube(POINT* MINPOINT, POINT* MAXPOINT,int deltaX, int deltaY) {
+void Movecube(POINT* MINPOINT, POINT* MAXPOINT, int deltaX, int deltaY) {
 	MINPOINT->x += deltaX; // MINPOINT의 X 좌표 이동
 	MINPOINT->y += deltaY; // MINPOINT의 Y 좌표 이동
 	MAXPOINT->x += deltaX; // MAXPOINT의 X 좌표 이동

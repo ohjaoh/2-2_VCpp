@@ -4,9 +4,10 @@
 
 // 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
 bool LbuttonPressed = false;
-bool isMoving = false;
 bool SpacePressed = false;
+bool LbuttonCube = false;
 int Shape = 0;
+int isMoving = 0;
 
 // 그리는데 필요한 녀석들
 POINT startPoint = { 0 };
@@ -153,36 +154,42 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 	}
 				 break;
 	case WM_LBUTTONDOWN: {
-		LbuttonPressed = true;
 		if (Shape == 1 || Shape == 2 || Shape == 4 || Shape == 5) {
 			startPoint.x = LOWORD(lParam);
 			startPoint.y = HIWORD(lParam);
 		}
 		if (PtInRegion(cube, LOWORD(lParam), HIWORD(lParam))) {
-			// 여기서 클릭여부판단 변수필요
+			LbuttonCube = true;
 			test.x = LOWORD(lParam);
 			test.y = HIWORD(lParam);
+		}
+		else {
+			LbuttonPressed = true;
 		}
 	}break;
 	case WM_LBUTTONUP: {
 		LbuttonPressed = false;
 		endPoint.x = LOWORD(lParam);
 		endPoint.y = HIWORD(lParam);
+		if (LbuttonCube)
+		{
+			LbuttonCube = false;
+		}
 	}break;
 
 	case WM_RBUTTONDOWN:
 	{
 		if (PtInRect(&rectangle1, { LOWORD(lParam), HIWORD(lParam) })) // 만약 도형내부에서 클릭하면
 		{
-			test = { 0 };
 			// 도형내부에 클릭한 지점을 기준으로 사각형을 이동시킴
+			isMoving = 1;
 			startPoint.x = LOWORD(lParam);
 			startPoint.y = HIWORD(lParam);
 
 		}
 		if (PtInRegion(cube, LOWORD(lParam), HIWORD(lParam))) {
 			// cube는 lParam으로 startpoint를 변경하면 크기가 변함
-			isMoving = true;
+			isMoving = 2;
 			test.x = LOWORD(lParam);
 			test.y = HIWORD(lParam);
 		}
@@ -192,9 +199,9 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 
 	case WM_RBUTTONUP:
 	{
-		if (isMoving)
+		if (isMoving > 0)
 		{
-			isMoving = false;
+			isMoving = 0;
 		}
 	}
 	return 0;
@@ -202,21 +209,22 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 	{
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(drawingView, &ps);
+		POINT currentPoint = { 0 };
+
+		currentPoint.x = LOWORD(lParam);
+		currentPoint.y = HIWORD(lParam);
+
+		// startPoint와 currentPoint 사이의 차이를 계산
+		int deltaX = 0; deltaX = currentPoint.x - test.x;
+		int deltaY = 0; deltaY = currentPoint.y - test.y;
+
 		if (LbuttonPressed) {
 			endPoint.x = LOWORD(lParam);
 			endPoint.y = HIWORD(lParam);
 			if (Shape == 1 || Shape == 2)
 			{
-				// 사각형 크기 및 위치 설정 모듈화하기
-				rectangle1.left = min(startPoint.x, endPoint.x);
-				rectangle1.top = min(startPoint.y, endPoint.y);
-				rectangle1.right = max(startPoint.x, endPoint.x);
-				rectangle1.bottom = max(startPoint.y, endPoint.y);
-				// 원의 크기 및 위치 설정
-				Eclip.left = min(startPoint.x, endPoint.x);
-				Eclip.top = min(startPoint.y, endPoint.y);
-				Eclip.right = max(startPoint.x, endPoint.x);
-				Eclip.bottom = max(startPoint.y, endPoint.y);
+				rectangle1 = Drawrect(rectangle1, startPoint, endPoint);
+				Eclip = Drawrect(Eclip, startPoint, endPoint);
 				// WM_PAINT 메시지를 유발하여 화면에 그립니다.
 				InvalidateRect(drawingView, NULL, TRUE);
 			}
@@ -225,24 +233,35 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 			}
 		}
 
-		if (isMoving)
+		if (isMoving == 1)
 		{
-			rectangle1 = MoveRactangle(drawingView, hdc, lParam, rectangle1, startPoint);
-			Eclip = ScaleCircle(drawingView, hdc, lParam, Eclip, startPoint);
+			rectangle1 = MoveRactangle(lParam, rectangle1, startPoint);
+			Eclip = ScaleCircle(lParam, Eclip, startPoint);
 
-			POINT currentPoint;
-			currentPoint.x = LOWORD(lParam);
-			currentPoint.y = HIWORD(lParam);
-			// startPoint와 currentPoint 사이의 차이를 계산
-			int deltaX = 0; deltaX = currentPoint.x - test.x;
-			int deltaY = 0; deltaY = currentPoint.y - test.y;
+			int mouseX = LOWORD(lParam);
+			int mouseY = HIWORD(lParam);
+			startPoint.x = mouseX;
+			startPoint.y = mouseY;
 
+			// WM_PAINT 메시지를 유발하여 도형을 화면에 그립니다.
+			InvalidateRect(drawingView, NULL, TRUE);
+		}
+		if (isMoving == 2) {
 			// 도형 이동
 			Movecube(&startPoint, &endPoint, deltaX, deltaY);
 			cube = Drawcube(drawingView, hdc, startPoint, endPoint);
 
 			test = currentPoint;
-			// WM_PAINT 메시지를 유발하여 네모를 화면에 그립니다.
+			// WM_PAINT 메시지를 유발하여 도형을 화면에 그립니다.
+			InvalidateRect(drawingView, NULL, TRUE);
+		}
+
+		if (LbuttonCube) {
+			Scalecube(&startPoint, &endPoint, deltaX, deltaY);
+			cube = Drawcube(drawingView, hdc, startPoint, endPoint);
+
+			test = currentPoint;
+			// WM_PAINT 메시지를 유발하여 도형을 화면에 그립니다.
 			InvalidateRect(drawingView, NULL, TRUE);
 		}
 

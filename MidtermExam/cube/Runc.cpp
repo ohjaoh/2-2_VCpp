@@ -257,7 +257,7 @@ LRESULT CALLBACK drawingViewWndProc(HWND drawingView, UINT message, WPARAM wPara
 		}
 
 		if (LbuttonCube) {
-			Scalecube(&startPoint, &endPoint, deltaX, deltaY);
+			ScaleCube(&startPoint, &endPoint, deltaX);
 			cube = Drawcube(drawingView, hdc, startPoint, endPoint);
 
 			test = currentPoint;

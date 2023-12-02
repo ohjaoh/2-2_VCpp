@@ -140,25 +140,30 @@ void Movecube(POINT* MINPOINT, POINT* MAXPOINT, int deltaX, int deltaY) {
 	MAXPOINT->y += deltaY; // MAXPOINT의 Y 좌표 이동
 }
 
-void Scalecube(POINT* minPoint, POINT* maxPoint, int deltaX, int deltaY) {
-	double scaleFactor = 1;
+void ScaleCube(POINT* minPoint, POINT* maxPoint, int deltaX) {
+	double scaleFactor = 1.0;
 	if (deltaX > 0) {
-		scaleFactor = 1.0 + static_cast<double>(deltaX) / 100.0;  // 오른쪽으로 이동할 때마다 크기를 증가시킵니다.
+		// 오른쪽으로 이동할 때마다 크기를 증가시킵니다.
+		scaleFactor = 1.0 + static_cast<double>(deltaX) / 100.0;
 	}
 	else if (deltaX < 0) {
-		scaleFactor = 1.0 / (1.0 - static_cast<double>(deltaX) / 100.0);  // 왼쪽으로 이동할 때마다 크기를 감소시킵니다.
+		// 왼쪽으로 이동할 때마다 크기를 감소시킵니다.
+		scaleFactor = 1.0 / (1.0 - static_cast<double>(deltaX) / 100.0);
 	}
-	else {
-		scaleFactor = 1.0;  // 가로 이동이 없을 경우 크기는 변하지 않습니다.
-	}
+
+	// 현재 너비와 높이를 계산합니다.
 	int width = maxPoint->x - minPoint->x;
 	int height = maxPoint->y - minPoint->y;
+
+	// 도형의 중심점을 계산합니다.
 	int centerX = minPoint->x + width / 2;
 	int centerY = minPoint->y + height / 2;
 
+	// 새로운 너비와 높이를 계산합니다.
 	width = static_cast<int>(width * scaleFactor);
 	height = static_cast<int>(height * scaleFactor);
 
+	// 새로운 위치를 계산하여 minPoint와 maxPoint를 업데이트합니다.
 	minPoint->x = centerX - width / 2;
 	minPoint->y = centerY - height / 2;
 	maxPoint->x = minPoint->x + width;

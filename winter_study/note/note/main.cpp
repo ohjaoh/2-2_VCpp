@@ -1,9 +1,7 @@
 #include <windows.h>
 
-// 버튼에서 L버튼이 클릭이 되어야 그려지는 변수
-bool LbuttonPressed = false;
-bool SpacePressed = false;
-bool LbuttonCube = false;
+wchar_t  textBuffer[1024] = { 0 }; // 예시 버퍼
+int textLength = 0; // 현재 텍스트의 길이
 
 HBRUSH hBrush_background = CreateSolidBrush(RGB(204, 255, 153)); // 배경브러쉬
 HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));// 흰 배경 브러쉬
@@ -11,24 +9,18 @@ HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));// 흰 배경 브러
 // 윈도우 프로시저
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	switch (message) {
-	case WM_KEYDOWN:
-		if (wParam == VK_SPACE)
-		{
-			if (SpacePressed == false) {
-				SpacePressed = true;
-			}
+	case WM_CHAR:
+		if (textLength < sizeof(textBuffer) - 1) { // 버퍼 오버플로우 방지
+			textBuffer[textLength] = (char)wParam; // 문자 추가
+			textLength++;
+			textBuffer[textLength] = '\0'; // 널 문자로 문자열 종료
+			InvalidateRect(hWnd, NULL, TRUE); // 화면 갱신 요청
+		}
+		// 자녀 윈도우에 텍스트 변경을 알리고 갱신 요청
+		//SendMessage(WritingView, WM_USER_TEXT_UPDATE, (WPARAM)textBuffer, (LPARAM)textLength);
 
-			InvalidateRect(hWnd, NULL, TRUE);
-		}
 		break;
-	case WM_KEYUP:
-		if (wParam == VK_SPACE) {
-			if (SpacePressed == true) {
-				SpacePressed = false;
-			}
-			InvalidateRect(hWnd, NULL, TRUE);
-		}
-		break;
+
 	case WM_GETMINMAXINFO: {
 		RECT rect = { 0, 0, 700, 900 }; // 원하는 클라이언트 영역의 크기
 		AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
@@ -70,32 +62,12 @@ LRESULT CALLBACK WritingViewWndProc(HWND WritingView, UINT message, WPARAM wPara
 		HDC hdc = BeginPaint(WritingView, &ps);
 		FillRect(hdc, &rect, hBrush_background1);
 
+		TextOut(hdc, 10, 10, textBuffer, textLength);
+
 		EndPaint(WritingView, &ps);
 		break;
 	}
 				 break;
-	case WM_LBUTTONDOWN: {
-
-	}break;
-	case WM_LBUTTONUP: {
-		LbuttonPressed = false;
-		if (LbuttonCube)
-		{
-			LbuttonCube = false;
-		}
-	}break;
-
-	case WM_RBUTTONDOWN:
-	{
-
-	}
-	return 0;
-
-	case WM_RBUTTONUP:
-	{
-	}
-	return 0;
-
 	case WM_MOUSEMOVE:
 	{
 		PAINTSTRUCT ps;
@@ -158,12 +130,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	WNDCLASSEX wcWriting;
 	wcWriting.cbSize = sizeof(WNDCLASSEX);
 	wcWriting.style = CS_HREDRAW | CS_VREDRAW;
-	wcWriting.lpfnWndProc = WritingViewWndProc; // 드로잉 뷰의 메시지 처리 함수
+	wcWriting.lpfnWndProc = WritingViewWndProc; // 자식뷰의 메시지 처리 함수
 	wcWriting.cbClsExtra = 0;
 	wcWriting.cbWndExtra = 0;
 	wcWriting.hInstance = hInstance;
 	wcWriting.hIcon = NULL;
-	wcWriting.hCursor = LoadCursor(NULL, IDC_CROSS); // 마우스 포인터를 십자가로 설정
+	wcWriting.hCursor = LoadCursor(NULL, IDC_IBEAM); // 마우스 포인터를 빔모양으로 설정
 	wcWriting.hbrBackground = (HBRUSH)(GetStockObject(WHITE_BRUSH));
 	wcWriting.lpszMenuName = NULL;
 	wcWriting.lpszClassName = L"WritingViewClass";

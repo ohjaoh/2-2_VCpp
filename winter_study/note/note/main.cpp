@@ -1,7 +1,11 @@
 #include <windows.h>
+#include <fstream>
+#define ID_SAVE_BUTTON 1001  // 버튼 ID를 상수로 정의
 
-wchar_t  textBuffer[1024] = { 0 }; // 예시 버퍼
+wchar_t  textBuffer[2048] = { 0 }; // 텍스트 저장 버퍼
 int textLength = 0; // 현재 텍스트의 길이
+int y = 10;
+char test = '\n';
 
 HBRUSH hBrush_background = CreateSolidBrush(RGB(204, 255, 153)); // 배경브러쉬
 HBRUSH hBrush_background1 = CreateSolidBrush(RGB(255, 255, 255));// 흰 배경 브러쉬
@@ -11,14 +15,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	switch (message) {
 	case WM_CHAR:
 		if (textLength < sizeof(textBuffer) - 1) { // 버퍼 오버플로우 방지
-			textBuffer[textLength] = (char)wParam; // 문자 추가
-			textLength++;
+			if (wParam == VK_RETURN) {
+				textBuffer[textLength] = '\n';
+				textLength++;
+			}
+			else {
+				textBuffer[textLength] = (char)wParam; // 문자 추가
+				textLength++;
+			}
 			textBuffer[textLength] = '\0'; // 널 문자로 문자열 종료
 			InvalidateRect(hWnd, NULL, TRUE); // 화면 갱신 요청
 		}
-		// 자녀 윈도우에 텍스트 변경을 알리고 갱신 요청
-		//SendMessage(WritingView, WM_USER_TEXT_UPDATE, (WPARAM)textBuffer, (LPARAM)textLength);
-
+		if (wParam == VK_TAB) {
+			// 탭 문자를 공백 4개로 변환 (또는 원하는 수의 공백으로)
+			for (int i = 0; i < 4; ++i) {
+				if (textLength < sizeof(textBuffer) - 1) {
+					textBuffer[textLength] = ' ';
+					textLength++;
+				}
+			}
+			textBuffer[textLength] = '\0'; // 널 문자로 문자열 종료
+			InvalidateRect(hWnd, NULL, TRUE); // 화면 갱신 요청
+		}
 		break;
 
 	case WM_GETMINMAXINFO: {
@@ -33,7 +51,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 	}
 						 return 0;
 	case WM_COMMAND:
+		switch (LOWORD(wParam)) {
+		case ID_SAVE_BUTTON: {  // "저장하기" 버튼의 ID
+			OPENFILENAME ofn;       // 공통 대화 상자 구조체
+			wchar_t szFileName[MAX_PATH] = L"";
+
+			ZeroMemory(&ofn, sizeof(ofn));
+			ofn.lStructSize = sizeof(ofn);
+			ofn.hwndOwner = hWnd;
+			ofn.lpstrFilter = L"텍스트 파일 (*.txt)\0*.txt\0모든 파일 (*.*)\0*.*\0";
+			ofn.lpstrFile = szFileName;
+			ofn.nMaxFile = MAX_PATH;
+			ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+			ofn.lpstrDefExt = L"txt";
+
+			// "저장하기" 대화 상자를 표시
+			if (GetSaveFileName(&ofn)) {
+				std::wofstream file(szFileName);
+				if (file.is_open()) {
+					file << textBuffer;
+					file.close();
+				}
+			}
+		}
+						   break;
+		}
 		break;
+
 	case WM_PAINT: {
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
@@ -61,8 +105,24 @@ LRESULT CALLBACK WritingViewWndProc(HWND WritingView, UINT message, WPARAM wPara
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(WritingView, &ps);
 		FillRect(hdc, &rect, hBrush_background1);
+		// 텍스트 줄바꿈을 위한 변수들
+		int lineHeight = 20; // 라인 높이
+		int x = 10, y = 10; // 시작 위치
+		wchar_t* lineStart = textBuffer; // 줄 시작 위치
+		wchar_t* p = textBuffer; // 현재 처리 중인 문자 위치
 
-		TextOut(hdc, 10, 10, textBuffer, textLength);
+		while (*p) {
+			if (*p == L'\n') {
+				// 현재 줄을 화면에 그림
+				TextOut(hdc, x, y, lineStart, p - lineStart);
+				// 다음 줄의 시작 위치와 y 좌표 업데이트
+				lineStart = p + 1;
+				y += lineHeight;
+			}
+			p++;
+		}
+		// 마지막 줄을 화면에 그림
+		TextOut(hdc, x, y, lineStart, p - lineStart);
 
 		EndPaint(WritingView, &ps);
 		break;
@@ -164,12 +224,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	}
 
 	hButton1 = CreateWindow(
-		L"BUTTON", L"글작성", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		L"BUTTON", L"불러오기", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		10, 10, 100, 60, hWnd, (HMENU)1, hInstance, NULL);
 
 	hButton2 = CreateWindow(
 		L"BUTTON", L"저장", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		120, 10, 100, 60, hWnd, (HMENU)2, hInstance, NULL);
+		120, 10, 100, 60, hWnd, (HMENU)ID_SAVE_BUTTON, hInstance, NULL);
 
 
 	ShowWindow(hWnd, nCmdShow);

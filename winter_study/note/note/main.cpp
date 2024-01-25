@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <fstream>
 #define ID_SAVE_BUTTON 1001  // 버튼 ID를 상수로 정의
+#define ID_LOAD_BUTTON 1002  // 버튼 ID를 상수로 정의
 
 wchar_t  textBuffer[2048] = { 0 }; // 텍스트 저장 버퍼
 int textLength = 0; // 현재 텍스트의 길이
@@ -71,6 +72,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
 				if (file.is_open()) {
 					file << textBuffer;
 					file.close();
+				}
+			}
+		}
+						   break;
+		case ID_LOAD_BUTTON: {  // "불러오기" 버튼의 ID
+			OPENFILENAME ofn;
+			wchar_t szFileName[MAX_PATH] = L"";
+
+			ZeroMemory(&ofn, sizeof(ofn));
+			ofn.lStructSize = sizeof(ofn);
+			ofn.hwndOwner = hWnd;
+			ofn.lpstrFilter = L"텍스트 파일 (*.txt)\0*.txt\0모든 파일 (*.*)\0*.*\0";
+			ofn.lpstrFile = szFileName;
+			ofn.nMaxFile = MAX_PATH;
+			ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+
+			// 파일 열기 대화 상자 표시
+			if (GetOpenFileName(&ofn)) {
+				std::wifstream file(szFileName);
+				if (file.is_open()) {
+					textLength = 0; // 버퍼 초기화
+					while (file.peek() != WEOF) {
+						textBuffer[textLength++] = file.get();
+						if (textLength >= sizeof(textBuffer) - 1) break; // 버퍼 오버플로우 방지
+					}
+					textBuffer[textLength] = '\0'; // 널 문자로 문자열 종료
+					file.close();
+					SetFocus(hWnd);// 포커스를 부모뷰로 하고 글을 입력하면 출력화면이 떠오름
+					InvalidateRect(hWnd, NULL, TRUE); // 화면 갱신 요청
 				}
 			}
 		}
@@ -225,7 +255,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	hButton1 = CreateWindow(
 		L"BUTTON", L"불러오기", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		10, 10, 100, 60, hWnd, (HMENU)1, hInstance, NULL);
+		10, 10, 100, 60, hWnd, (HMENU)ID_LOAD_BUTTON, hInstance, NULL);
 
 	hButton2 = CreateWindow(
 		L"BUTTON", L"저장", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
